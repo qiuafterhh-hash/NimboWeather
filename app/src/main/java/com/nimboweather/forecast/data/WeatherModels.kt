@@ -25,6 +25,7 @@ data class Main(
 
 @Serializable
 data class WeatherDesc(
+    val id: Int = 0,
     val main: String? = null,
     val description: String? = null,
     val icon: String? = null

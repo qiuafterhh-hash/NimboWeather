@@ -25,10 +25,10 @@
             android:textSize="12sp"
             android:textStyle="bold" />
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/rvHourly"
+        <com.nimboweather.forecast.ui.home.HourlyTrendView
+            android:id="@+id/trendHourly"
             android:layout_width="match_parent"
-            android:layout_height="100dp"
+            android:layout_height="140dp"
             android:layout_marginTop="6dp" />
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

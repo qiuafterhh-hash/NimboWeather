@@ -7,6 +7,7 @@ import com.nimboweather.forecast.data.WeatherCache
 import com.nimboweather.forecast.data.WeatherRepository
 import com.nimboweather.forecast.data.WeatherSnapshot
 import com.nimboweather.forecast.notify.Notifications
+import com.nimboweather.forecast.prefs.AppPrefs
 import com.nimboweather.forecast.prefs.CityStore
 import com.nimboweather.forecast.prefs.UnitsStore
 import com.nimboweather.forecast.widget.WeatherWidgetProvider
@@ -38,7 +39,19 @@ class WeatherWorker(
                 icon = cur.weather.firstOrNull()?.icon
             )
             WeatherCache(applicationContext).save(snap)
+
+            val prefs = AppPrefs(applicationContext)
+            if (prefs.persistentNotification) {
+                Notifications.updatePersistent(applicationContext, snap, true)
+            }
             Notifications.postDaily(applicationContext, snap)
+
+            val condId = cur.weather.firstOrNull()?.id ?: 0
+            if (isSevere(condId)) {
+                val what = cur.weather.firstOrNull()?.description?.replaceFirstChar { it.uppercase() } ?: "Severe conditions"
+                Notifications.postAlert(applicationContext, "Severe weather alert", "$what in $place")
+            }
+
             WeatherWidgetProvider.refresh(applicationContext)
             Result.success()
         } catch (e: Exception) {
@@ -49,5 +62,10 @@ class WeatherWorker(
     companion object {
         private const val DEFAULT_LAT = 51.5074
         private const val DEFAULT_LON = -0.1278
+
+        // OWM condition codes: 2xx thunderstorm, 781 tornado, 504 extreme heat,
+        // 602 heavy snow, 622 heavy shower snow.
+        private fun isSevere(id: Int): Boolean =
+            id in 200..232 || id == 781 || id == 504 || id == 602 || id == 622
     }
 }

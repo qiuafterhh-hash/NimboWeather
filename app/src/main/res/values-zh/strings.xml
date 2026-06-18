@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Nimbo 天气</string>
+    <string name="refresh">刷新</string>
+    <string name="test_interstitial">测试广告</string>
+    <string name="error_prefix">错误：%1$s</string>
+    <string name="unit_toggle">°C/°F</string>
+    <string name="cities">城市</string>
+    <string name="hourly_label">每小时</string>
+    <string name="daily_label">每日预报</string>
+    <string name="details_label">详情</string>
+    <string name="precip_label">降水概率</string>
+    <string name="sun_label">日出与日落</string>
+    <string name="sunrise">日出</string>
+    <string name="sunset">日落</string>
+    <string name="add_city">+ 添加城市</string>
+    <string name="cities_subtitle">点击切换城市</string>
+    <string name="add_city_title">添加城市</string>
+    <string name="popular_cities">热门城市</string>
+    <string name="use_my_location">📍 使用当前定位</string>
+    <string name="location_unavailable">无法获取定位——请开启定位或手动选择城市</string>
+    <string name="location_permission_needed">需要定位权限</string>
+    <string name="onboarding_title">Nimbo 天气</string>
+    <string name="onboarding_b1">🌤  精准的本地、逐小时与每日预报</string>
+    <string name="onboarding_b2">⛈  恶劣天气预警</string>
+    <string name="onboarding_b3">📲  桌面小组件与常驻通知</string>
+    <string name="onboarding_cta">允许定位并继续</string>
+    <string name="onboarding_skip">稍后再说</string>
+    <string name="persistent_notif_label">常驻通知</string>
+    <string name="widget_config_title">选择小组件显示的城市</string>
+    <string name="language_label">语言</string>
+    <string name="language_dialog_title">选择语言</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">中文</string>
+    <string name="search_hint">搜索城市</string>
+    <string name="search">搜索</string>
+    <string name="feels_fmt">体感 %1$d%2$s</string>
+</resources>

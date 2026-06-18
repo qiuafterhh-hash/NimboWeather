@@ -2,8 +2,10 @@ package com.nimboweather.forecast.data
 
 import android.content.Context
 import com.nimboweather.forecast.prefs.UnitsStore
+import kotlinx.serialization.Serializable
 
 /** Last current-weather snapshot, used by the widget + notification (instant render). */
+@Serializable
 data class WeatherSnapshot(
     val city: String,
     val temp: Int,

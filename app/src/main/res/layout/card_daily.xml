@@ -25,6 +25,12 @@
             android:textSize="12sp"
             android:textStyle="bold" />
 
+        <com.nimboweather.forecast.ui.home.DailyTrendView
+            android:id="@+id/trendDaily"
+            android:layout_width="match_parent"
+            android:layout_height="150dp"
+            android:layout_marginTop="6dp" />
+
         <LinearLayout
             android:id="@+id/llDaily"
             android:layout_width="match_parent"

@@ -5,7 +5,10 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.os.LocaleListCompat
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -18,7 +21,10 @@ import com.nimboweather.forecast.ads.AdMediator
 import com.nimboweather.forecast.ads.BannerLoader
 import com.nimboweather.forecast.config.TestAdUnits
 import com.nimboweather.forecast.consent.ConsentManager
+import com.nimboweather.forecast.data.WeatherCache
 import com.nimboweather.forecast.databinding.ActivityMainBinding
+import com.nimboweather.forecast.notify.Notifications
+import com.nimboweather.forecast.prefs.AppPrefs
 import com.nimboweather.forecast.prefs.CityStore
 import com.nimboweather.forecast.prefs.SavedCity
 import com.nimboweather.forecast.prefs.UnitsStore
@@ -69,6 +75,15 @@ class MainActivity : AppCompatActivity(), CityHost {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
             binding.viewPager.setCurrentItem(cities.size, true) // last = add page
         }
+
+        val appPrefs = AppPrefs(this)
+        binding.switchPersistent.isChecked = appPrefs.persistentNotification
+        binding.switchPersistent.setOnCheckedChangeListener { _, checked ->
+            appPrefs.persistentNotification = checked
+            Notifications.updatePersistent(this, WeatherCache(this).load(), checked)
+        }
+        binding.tvLanguage.setOnClickListener { showLanguageDialog() }
+
         binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
             override fun onPageSelected(position: Int) = updateTitle(position)
         })
@@ -131,6 +146,7 @@ class MainActivity : AppCompatActivity(), CityHost {
         } else {
             binding.toolbar.title = getString(R.string.add_city_title)
         }
+        binding.pageDots.set(cities.size, position.coerceIn(0, (cities.size - 1).coerceAtLeast(0)))
     }
 
     private fun populateDrawer() {
@@ -145,6 +161,26 @@ class MainActivity : AppCompatActivity(), CityHost {
             }
             container.addView(row)
         }
+    }
+
+    private fun showLanguageDialog() {
+        val names = arrayOf(
+            getString(R.string.language_system),
+            getString(R.string.language_english),
+            getString(R.string.language_chinese)
+        )
+        val tags = arrayOf("", "en", "zh")
+        AlertDialog.Builder(this)
+            .setTitle(R.string.language_dialog_title)
+            .setItems(names) { _, which ->
+                val tag = tags[which]
+                AppCompatDelegate.setApplicationLocales(
+                    if (tag.isEmpty()) LocaleListCompat.getEmptyLocaleList()
+                    else LocaleListCompat.forLanguageTags(tag)
+                )
+            }
+            .show()
+        binding.drawerLayout.closeDrawer(GravityCompat.START)
     }
 
     companion object {

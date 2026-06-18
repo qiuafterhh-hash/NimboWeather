@@ -68,16 +68,16 @@ class HomeCardRenderer(private val context: Context) {
 
     private fun hourlyCard(parent: ViewGroup, c: HomeCard.Hourly): View {
         val v = inflate(R.layout.card_hourly, parent)
-        val rv = v.findViewById<RecyclerView>(R.id.rvHourly)
-        rv.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
-        rv.isNestedScrollingEnabled = false
-        rv.adapter = HourlyAdapter().apply { submit(c.items) }
+        v.findViewById<HourlyTrendView>(R.id.trendHourly).points =
+            c.items.map { HourlyTrendView.P(it.timeLabel, it.temp) }
         v.setOnClickListener { openDetail() }
         return v
     }
 
     private fun dailyCard(parent: ViewGroup, c: HomeCard.Daily): View {
         val v = inflate(R.layout.card_daily, parent)
+        v.findViewById<DailyTrendView>(R.id.trendDaily).points =
+            c.items.map { DailyTrendView.P(it.dayLabel, it.min, it.max) }
         val ll = v.findViewById<LinearLayout>(R.id.llDaily)
         c.items.forEach { d ->
             val row = inflate(R.layout.item_daily, ll)
