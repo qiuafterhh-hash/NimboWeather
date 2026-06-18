@@ -24,40 +24,11 @@
             app:title="@string/app_name"
             app:titleTextColor="@color/on_sky" />
 
-        <FrameLayout
+        <androidx.viewpager2.widget.ViewPager2
+            android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-                android:id="@+id/swipeRefresh"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent">
-
-                <androidx.core.widget.NestedScrollView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:clipToPadding="false"
-                    android:fillViewport="true">
-
-                    <LinearLayout
-                        android:id="@+id/llContent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:paddingHorizontal="16dp"
-                        android:paddingBottom="20dp" />
-                </androidx.core.widget.NestedScrollView>
-            </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-            <ProgressBar
-                android:id="@+id/progress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:indeterminateTint="@color/on_sky"
-                android:visibility="gone" />
-        </FrameLayout>
+            android:layout_weight="1" />
 
         <FrameLayout
             android:id="@+id/bannerContainer"

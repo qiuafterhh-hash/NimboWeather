@@ -1,20 +1,17 @@
 package com.nimboweather.forecast.ui
 
 import android.Manifest
-import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.view.View
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.GravityCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import com.nimboweather.forecast.R
 import com.nimboweather.forecast.ads.AdFormat
 import com.nimboweather.forecast.ads.AdMediator
@@ -22,32 +19,31 @@ import com.nimboweather.forecast.ads.BannerLoader
 import com.nimboweather.forecast.config.TestAdUnits
 import com.nimboweather.forecast.consent.ConsentManager
 import com.nimboweather.forecast.databinding.ActivityMainBinding
-import com.nimboweather.forecast.location.LocationProvider
-import com.nimboweather.forecast.ui.findcity.FindCityActivity
-import com.nimboweather.forecast.ui.home.HomeCard
-import com.nimboweather.forecast.ui.home.HomeCardRenderer
-import com.nimboweather.forecast.ui.home.SkyGradient
-import kotlinx.coroutines.launch
+import com.nimboweather.forecast.prefs.CityStore
+import com.nimboweather.forecast.prefs.SavedCity
+import com.nimboweather.forecast.prefs.UnitsStore
+import com.nimboweather.forecast.ui.home.CityHost
+import com.nimboweather.forecast.ui.home.CityPagerAdapter
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), CityHost {
 
     private lateinit var binding: ActivityMainBinding
-    private val viewModel: MainViewModel by viewModels()
-    private val renderer by lazy { HomeCardRenderer(this) }
+    private lateinit var cityStore: CityStore
+    private lateinit var unitsStore: UnitsStore
+    private var cities: List<SavedCity> = emptyList()
 
     private val permLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
-    ) { viewModel.start() }
+    ) { rebuildPager(keepCurrent = true) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        cityStore = CityStore(this)
+        unitsStore = UnitsStore(this)
 
-        // Light icons on the (dark) sky gradient.
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
-
-        // Edge-to-edge (forced on API 35): pad for status bar + nav bar.
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             binding.toolbar.updatePadding(top = bars.top)
@@ -56,7 +52,6 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Gather UMP consent, then init ad SDKs + load the banner.
         ConsentManager.gather(this) {
             AdMediator.initializeAds(this)
             BannerLoader.attach(binding.bannerContainer, TestAdUnits.BANNER)
@@ -66,16 +61,17 @@ class MainActivity : AppCompatActivity() {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
         binding.toolbar.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.action_units) { viewModel.toggleUnits(); true } else false
+            if (item.itemId == R.id.action_units) {
+                unitsStore.toggle(); rebuildPager(keepCurrent = true); true
+            } else false
         }
         binding.btnAddCity.setOnClickListener {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
-            startActivity(Intent(this, FindCityActivity::class.java))
+            binding.viewPager.setCurrentItem(cities.size, true) // last = add page
         }
-
-        binding.swipeRefresh.setOnRefreshListener { viewModel.start() }
-
-        lifecycleScope.launch { viewModel.state.collect { render(it) } }
+        binding.viewPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) = updateTitle(position)
+        })
 
         val perms = mutableListOf(
             Manifest.permission.ACCESS_COARSE_LOCATION,
@@ -85,46 +81,73 @@ class MainActivity : AppCompatActivity() {
             perms.add(Manifest.permission.POST_NOTIFICATIONS)
         }
         permLauncher.launch(perms.toTypedArray())
+
+        rebuildPager(keepCurrent = false)
     }
 
     override fun onResume() {
         super.onResume()
         populateDrawer()
-        viewModel.start()
+    }
+
+    override fun addCity(city: SavedCity) {
+        cityStore.add(city)
+        cityStore.selected = city
+        cities = currentCities()
+        binding.viewPager.adapter = CityPagerAdapter(this, cities)
+        val idx = cities.indexOfFirst { it.lat == city.lat && it.lon == city.lon }.coerceAtLeast(0)
+        binding.viewPager.setCurrentItem(idx, false)
+        updateTitle(idx)
+        populateDrawer()
+        // Monetization moment: interstitial on adding/switching city.
+        AdMediator.maybeShow(this, AdFormat.INTERSTITIAL, placement = "city_added")
+    }
+
+    private fun rebuildPager(keepCurrent: Boolean) {
+        val prev = binding.viewPager.currentItem
+        cities = currentCities()
+        binding.viewPager.adapter = CityPagerAdapter(this, cities)
+        val target = if (keepCurrent) prev.coerceIn(0, cities.size) else selectedIndex()
+        binding.viewPager.setCurrentItem(target, false)
+        updateTitle(target)
+        populateDrawer()
+    }
+
+    private fun currentCities(): List<SavedCity> {
+        val saved = cityStore.saved()
+        return saved.ifEmpty { listOf(DEFAULT_CITY) }
+    }
+
+    private fun selectedIndex(): Int {
+        val sel = cityStore.selected ?: return 0
+        val i = cities.indexOfFirst { it.lat == sel.lat && it.lon == sel.lon }
+        return if (i >= 0) i else 0
+    }
+
+    private fun updateTitle(position: Int) {
+        if (position < cities.size) {
+            binding.toolbar.title = cities[position].display()
+            cityStore.selected = cities[position]
+        } else {
+            binding.toolbar.title = getString(R.string.add_city_title)
+        }
     }
 
     private fun populateDrawer() {
         val container = binding.drawerCities
         container.removeAllViews()
-        viewModel.savedCities().forEach { city ->
+        cities.forEachIndexed { idx, city ->
             val row = layoutInflater.inflate(R.layout.item_drawer_city, container, false)
             row.findViewById<TextView>(R.id.tvDrawerCity).text = city.display()
             row.setOnClickListener {
-                viewModel.selectCity(city)
+                binding.viewPager.setCurrentItem(idx, false)
                 binding.drawerLayout.closeDrawer(GravityCompat.START)
-                // Monetization moment: interstitial on city switch (may render native full-screen).
-                AdMediator.maybeShow(this, AdFormat.INTERSTITIAL, placement = "city_switch")
             }
             container.addView(row)
         }
     }
 
-    private fun render(state: MainViewModel.UiState) {
-        when (state) {
-            is MainViewModel.UiState.Loading -> {
-                if (!binding.swipeRefresh.isRefreshing) binding.progress.visibility = View.VISIBLE
-            }
-            is MainViewModel.UiState.Data -> {
-                binding.progress.visibility = View.GONE
-                binding.swipeRefresh.isRefreshing = false
-                val icon = state.cards.firstNotNullOfOrNull { (it as? HomeCard.Current)?.icon }
-                binding.contentRoot.background = SkyGradient.drawable(icon)
-                renderer.render(binding.llContent, state.cards)
-            }
-            is MainViewModel.UiState.Error -> {
-                binding.progress.visibility = View.GONE
-                binding.swipeRefresh.isRefreshing = false
-            }
-        }
+    companion object {
+        private val DEFAULT_CITY = SavedCity("London", "GB", 51.5074, -0.1278)
     }
 }

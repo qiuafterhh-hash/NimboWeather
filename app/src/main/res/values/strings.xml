@@ -15,6 +15,11 @@
     <string name="sunset">Sunset</string>
     <string name="add_city">+ Add city</string>
     <string name="cities_subtitle">Tap to switch location</string>
+    <string name="add_city_title">Add city</string>
+    <string name="popular_cities">Popular cities</string>
+    <string name="use_my_location">📍 Use my location</string>
+    <string name="location_unavailable">Location unavailable — enable location or pick a city</string>
+    <string name="location_permission_needed">Location permission needed</string>
     <string name="search_hint">Search city</string>
     <string name="search">Search</string>
     <string name="feels_fmt">Feels %1$d%2$s</string>

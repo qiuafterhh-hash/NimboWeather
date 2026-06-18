@@ -9,6 +9,7 @@ import com.nimboweather.forecast.R
 import com.nimboweather.forecast.data.GeoLocation
 
 class CityAdapter(
+    private val layoutRes: Int = R.layout.item_city,
     private val onClick: (GeoLocation) -> Unit
 ) : RecyclerView.Adapter<CityAdapter.VH>() {
 
@@ -21,7 +22,7 @@ class CityAdapter(
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(parent.context).inflate(R.layout.item_city, parent, false)
+        val v = LayoutInflater.from(parent.context).inflate(layoutRes, parent, false)
         return VH(v, onClick)
     }
 
