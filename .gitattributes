@@ -1,0 +1,15 @@
+# Normalize line endings across the team (Windows/macOS/Linux).
+* text=auto eol=lf
+
+# Windows batch + the Gradle wrapper script must keep their native endings.
+*.bat        text eol=crlf
+gradlew      text eol=lf
+
+# Treat these as binary (never munge).
+*.png  binary
+*.jpg  binary
+*.webp binary
+*.jar  binary
+*.keystore binary
+*.jks  binary
+*.apk  binary

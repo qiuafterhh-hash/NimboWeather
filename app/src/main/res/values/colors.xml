@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="nimbo_primary">#1E63E0</color>
+    <color name="nimbo_primary_dark">#0E4FCC</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+
+    <!-- Glassmorphism on the sky gradient -->
+    <color name="glass_fill">#26FFFFFF</color>
+    <color name="glass_stroke">#40FFFFFF</color>
+    <color name="on_sky">#FFFFFFFF</color>
+    <color name="on_sky_secondary">#B3FFFFFF</color>
+    <color name="on_sky_tertiary">#80FFFFFF</color>
+</resources>

@@ -1,0 +1,11 @@
+# Copy this file to `local.properties` and fill in your values.
+# `local.properties` is gitignored — DO NOT COMMIT it.
+
+# Path to your Android SDK (Android Studio installs it here by default).
+# Windows example:
+sdk.dir=C\:\\Users\\<you>\\AppData\\Local\\Android\\Sdk
+# macOS example:
+# sdk.dir=/Users/<you>/Library/Android/sdk
+
+# OpenWeatherMap API key — get one free at https://home.openweathermap.org/api_keys
+OPENWEATHER_API_KEY=<your_openweathermap_api_key>

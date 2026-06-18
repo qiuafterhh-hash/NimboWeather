@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Fixed light base; the app draws its own sky gradient, so we never want
+         the system dark-mode surfaces (which previously made cards unreadable). -->
+    <style name="Theme.Nimbo" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/nimbo_primary</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+    </style>
+</resources>
