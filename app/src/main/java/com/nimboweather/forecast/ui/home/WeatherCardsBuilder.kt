@@ -61,7 +61,8 @@ class WeatherCardsBuilder(private val context: Context) {
                     min = today?.min ?: temp,
                     rainProb = precip.firstOrNull()?.pop ?: 0,
                     pressure = cur.main?.pressure ?: 0,
-                    windText = "${degToCompass(cur.wind?.deg)} · ${(cur.wind?.speed ?: 0.0).roundToInt()} ${unitsStore.speedSymbol()}"
+                    windText = "${degToCompass(cur.wind?.deg)} · ${(cur.wind?.speed ?: 0.0).roundToInt()} ${unitsStore.speedSymbol()}",
+                    windDeg = cur.wind?.deg
                 )
                 HomeCardType.HOURLY -> hourlyAll.take(8).takeIf { it.isNotEmpty() }?.let { HomeCard.Hourly(it) }
                 HomeCardType.PRECIP -> precip.takeIf { it.isNotEmpty() }?.let { HomeCard.Precip(it) }
