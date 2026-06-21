@@ -19,7 +19,8 @@ sealed interface HomeCard {
         val min: Int,
         val rainProb: Int,
         val pressure: Int,
-        val windText: String
+        val windText: String,
+        val windDeg: Int? = null
     ) : HomeCard
 
     data class Hourly(val items: List<HourlyForecast>) : HomeCard

@@ -59,9 +59,9 @@ class HomeCardRenderer(private val context: Context) {
             min = "${c.min}°",
             rain = "${c.rainProb}%",
             pressure = "${c.pressure}hPa",
-            windText = c.windText
+            windText = c.windText,
+            windDeg = c.windDeg
         )
-        v.findViewById<ImageView>(R.id.ivDialIcon).load(IconUrls.owm(c.icon))
         v.setOnClickListener { openDetail() }
         return v
     }
