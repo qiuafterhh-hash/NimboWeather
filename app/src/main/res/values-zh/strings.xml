@@ -36,4 +36,7 @@
     <string name="search_hint">搜索城市</string>
     <string name="search">搜索</string>
     <string name="feels_fmt">体感 %1$d%2$s</string>
+    <string name="heatmap">热力图</string>
+    <string name="heatmap_coming_soon">热力图功能敬请期待</string>
+    <string name="units_label">单位（°C / °F）</string>
 </resources>

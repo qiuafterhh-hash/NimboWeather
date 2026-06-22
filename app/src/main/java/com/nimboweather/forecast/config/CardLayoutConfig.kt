@@ -12,8 +12,7 @@ object CardLayoutConfig {
         HomeCardType.CURRENT,
         HomeCardType.HOURLY,
         HomeCardType.PRECIP,
-        HomeCardType.DETAILS,
-        HomeCardType.SUNRISE_SUNSET,
-        HomeCardType.DAILY
+        HomeCardType.DAILY,
+        HomeCardType.DETAILS
     )
 }

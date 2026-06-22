@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity(), CityHost {
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            binding.toolbar.updatePadding(top = bars.top)
+            binding.topBar.updatePadding(top = bars.top)
             binding.bannerContainer.updatePadding(bottom = bars.bottom)
             binding.drawerContent.updatePadding(top = bars.top)
             insets
@@ -63,13 +63,11 @@ class MainActivity : AppCompatActivity(), CityHost {
             BannerLoader.attach(binding.bannerContainer, TestAdUnits.BANNER)
         }
 
-        binding.toolbar.setNavigationOnClickListener {
+        binding.btnCityList.setOnClickListener {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.action_units) {
-                unitsStore.toggle(); rebuildPager(keepCurrent = true); true
-            } else false
+        binding.btnHeatmap.setOnClickListener {
+            android.widget.Toast.makeText(this, R.string.heatmap_coming_soon, android.widget.Toast.LENGTH_SHORT).show()
         }
         binding.btnAddCity.setOnClickListener {
             binding.drawerLayout.closeDrawer(GravityCompat.START)
@@ -81,6 +79,10 @@ class MainActivity : AppCompatActivity(), CityHost {
         binding.switchPersistent.setOnCheckedChangeListener { _, checked ->
             appPrefs.persistentNotification = checked
             Notifications.updatePersistent(this, WeatherCache(this).load(), checked)
+        }
+        binding.switchUnits.isChecked = !unitsStore.isMetric()
+        binding.switchUnits.setOnCheckedChangeListener { _, _ ->
+            unitsStore.toggle(); rebuildPager(keepCurrent = true)
         }
         binding.tvLanguage.setOnClickListener { showLanguageDialog() }
 
@@ -141,10 +143,10 @@ class MainActivity : AppCompatActivity(), CityHost {
 
     private fun updateTitle(position: Int) {
         if (position < cities.size) {
-            binding.toolbar.title = cities[position].display()
+            binding.tvCity.text = cities[position].display()
             cityStore.selected = cities[position]
         } else {
-            binding.toolbar.title = getString(R.string.add_city_title)
+            binding.tvCity.text = getString(R.string.add_city_title)
         }
         binding.pageDots.set(cities.size, position.coerceIn(0, (cities.size - 1).coerceAtLeast(0)))
     }

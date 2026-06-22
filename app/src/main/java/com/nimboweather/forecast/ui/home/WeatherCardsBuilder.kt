@@ -1,12 +1,16 @@
 package com.nimboweather.forecast.ui.home
 
 import android.content.Context
+import com.nimboweather.forecast.data.AirPollutionResponse
+import com.nimboweather.forecast.data.AirQualityIndex
 import com.nimboweather.forecast.data.CurrentWeather
+import com.nimboweather.forecast.data.MoonPhase
 import com.nimboweather.forecast.data.DailyForecast
 import com.nimboweather.forecast.data.ForecastResponse
 import com.nimboweather.forecast.data.HourlyForecast
 import com.nimboweather.forecast.data.WeatherCache
 import com.nimboweather.forecast.data.WeatherSnapshot
+import com.nimboweather.forecast.R
 import com.nimboweather.forecast.config.CardLayoutConfig
 import com.nimboweather.forecast.prefs.UnitsStore
 import com.nimboweather.forecast.ui.detail.DetailHolder
@@ -25,7 +29,7 @@ class WeatherCardsBuilder(private val context: Context) {
     private val dateIn = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private val dayOut = SimpleDateFormat("EEE", Locale.US)
 
-    fun build(cur: CurrentWeather, fc: ForecastResponse, place: String): List<HomeCard> {
+    fun build(cur: CurrentWeather, fc: ForecastResponse, place: String, air: AirPollutionResponse? = null): List<HomeCard> {
         val sym = unitsStore.tempSymbol()
         val hourlyAll = mapHourly(fc, Int.MAX_VALUE)
         val daily = mapDaily(fc)
@@ -66,7 +70,7 @@ class WeatherCardsBuilder(private val context: Context) {
                 )
                 HomeCardType.HOURLY -> hourlyAll.take(8).takeIf { it.isNotEmpty() }?.let { HomeCard.Hourly(it) }
                 HomeCardType.PRECIP -> precip.takeIf { it.isNotEmpty() }?.let { HomeCard.Precip(it) }
-                HomeCardType.DETAILS -> HomeCard.Details(buildMetrics(cur, sym))
+                HomeCardType.DETAILS -> HomeCard.Details(buildMetrics(cur, sym, air))
                 HomeCardType.SUNRISE_SUNSET -> cur.sys?.takeIf { it.sunrise > 0 }?.let {
                     HomeCard.SunriseSunset(fmtTime(it.sunrise, cur.timezone), fmtTime(it.sunset, cur.timezone))
                 }
@@ -81,14 +85,23 @@ class WeatherCardsBuilder(private val context: Context) {
         return dirs[((deg / 22.5).roundToInt() % 16 + 16) % 16]
     }
 
-    private fun buildMetrics(cur: CurrentWeather, sym: String): List<Metric> {
+    private fun buildMetrics(cur: CurrentWeather, sym: String, air: AirPollutionResponse?): List<Metric> {
         val list = mutableListOf<Metric>()
-        cur.main?.feelsLike?.let { list.add(Metric("Feels like", "${it.roundToInt()}$sym")) }
-        cur.main?.humidity?.let { list.add(Metric("Humidity", "$it%")) }
-        cur.main?.pressure?.let { list.add(Metric("Pressure", "$it hPa")) }
-        cur.wind?.speed?.let { list.add(Metric("Wind", "${it.roundToInt()} ${unitsStore.speedSymbol()}")) }
-        cur.visibility?.let { list.add(Metric("Visibility", "${it / 1000} km")) }
-        cur.clouds?.all?.let { list.add(Metric("Cloudiness", "$it%")) }
+        air?.list?.firstOrNull()?.components?.pm25?.let { pm ->
+            val aqi = AirQualityIndex.usAqiFromPm25(pm)
+            list.add(Metric("Air quality", aqi.toString(), R.drawable.ic_aqi, AirQualityIndex.category(aqi)))
+        }
+        val now = System.currentTimeMillis()
+        list.add(Metric("Moon", MoonPhase.phaseName(now), R.drawable.ic_moon, "${(MoonPhase.illumination(now) * 100).roundToInt()}% lit"))
+        cur.sys?.takeIf { it.sunrise > 0 }?.let {
+            list.add(Metric("Sunrise", fmtTime(it.sunrise, cur.timezone), R.drawable.ic_sunrise, "Sunset ${fmtTime(it.sunset, cur.timezone)}"))
+        }
+        cur.main?.feelsLike?.let { list.add(Metric("Feels like", "${it.roundToInt()}$sym", R.drawable.ic_feels)) }
+        cur.main?.humidity?.let { list.add(Metric("Humidity", "$it%", R.drawable.ic_humidity)) }
+        cur.main?.pressure?.let { list.add(Metric("Pressure", "$it hPa", R.drawable.ic_pressure)) }
+        cur.wind?.speed?.let { list.add(Metric("Wind", "${it.roundToInt()} ${unitsStore.speedSymbol()}", R.drawable.ic_wind)) }
+        cur.visibility?.let { list.add(Metric("Visibility", "${it / 1000} km", R.drawable.ic_visibility)) }
+        cur.clouds?.all?.let { list.add(Metric("Cloudiness", "$it%", R.drawable.ic_cloud)) }
         return list
     }
 

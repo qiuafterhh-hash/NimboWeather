@@ -36,4 +36,7 @@
     <string name="search_hint">Search city</string>
     <string name="search">Search</string>
     <string name="feels_fmt">Feels %1$d%2$s</string>
+    <string name="heatmap">Weather map</string>
+    <string name="heatmap_coming_soon">Weather map coming soon</string>
+    <string name="units_label">Units (°C / °F)</string>
 </resources>
