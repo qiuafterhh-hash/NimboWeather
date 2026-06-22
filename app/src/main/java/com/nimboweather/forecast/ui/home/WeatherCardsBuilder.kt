@@ -7,6 +7,7 @@ import com.nimboweather.forecast.data.ForecastResponse
 import com.nimboweather.forecast.data.HourlyForecast
 import com.nimboweather.forecast.data.WeatherCache
 import com.nimboweather.forecast.data.WeatherSnapshot
+import com.nimboweather.forecast.R
 import com.nimboweather.forecast.config.CardLayoutConfig
 import com.nimboweather.forecast.prefs.UnitsStore
 import com.nimboweather.forecast.ui.detail.DetailHolder
@@ -83,12 +84,15 @@ class WeatherCardsBuilder(private val context: Context) {
 
     private fun buildMetrics(cur: CurrentWeather, sym: String): List<Metric> {
         val list = mutableListOf<Metric>()
-        cur.main?.feelsLike?.let { list.add(Metric("Feels like", "${it.roundToInt()}$sym")) }
-        cur.main?.humidity?.let { list.add(Metric("Humidity", "$it%")) }
-        cur.main?.pressure?.let { list.add(Metric("Pressure", "$it hPa")) }
-        cur.wind?.speed?.let { list.add(Metric("Wind", "${it.roundToInt()} ${unitsStore.speedSymbol()}")) }
-        cur.visibility?.let { list.add(Metric("Visibility", "${it / 1000} km")) }
-        cur.clouds?.all?.let { list.add(Metric("Cloudiness", "$it%")) }
+        cur.sys?.takeIf { it.sunrise > 0 }?.let {
+            list.add(Metric("Sunrise", fmtTime(it.sunrise, cur.timezone), R.drawable.ic_sunrise, "Sunset ${fmtTime(it.sunset, cur.timezone)}"))
+        }
+        cur.main?.feelsLike?.let { list.add(Metric("Feels like", "${it.roundToInt()}$sym", R.drawable.ic_feels)) }
+        cur.main?.humidity?.let { list.add(Metric("Humidity", "$it%", R.drawable.ic_humidity)) }
+        cur.main?.pressure?.let { list.add(Metric("Pressure", "$it hPa", R.drawable.ic_pressure)) }
+        cur.wind?.speed?.let { list.add(Metric("Wind", "${it.roundToInt()} ${unitsStore.speedSymbol()}", R.drawable.ic_wind)) }
+        cur.visibility?.let { list.add(Metric("Visibility", "${it / 1000} km", R.drawable.ic_visibility)) }
+        cur.clouds?.all?.let { list.add(Metric("Cloudiness", "$it%", R.drawable.ic_cloud)) }
         return list
     }
 

@@ -30,5 +30,5 @@ sealed interface HomeCard {
     data class Precip(val points: List<PrecipPoint>) : HomeCard
 }
 
-data class Metric(val label: String, val value: String)
+data class Metric(val label: String, val value: String, val iconRes: Int = 0, val sub: String? = null)
 data class PrecipPoint(val time: String, val pop: Int)

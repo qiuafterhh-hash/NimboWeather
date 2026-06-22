@@ -96,8 +96,11 @@ class HomeCardRenderer(private val context: Context) {
         val grid = v.findViewById<GridLayout>(R.id.glMetrics)
         c.metrics.forEach { m ->
             val cell = inflate(R.layout.item_metric, grid)
+            cell.findViewById<ImageView>(R.id.ivMetricIcon).setImageResource(m.iconRes)
             cell.findViewById<TextView>(R.id.tvMetricLabel).text = m.label
             cell.findViewById<TextView>(R.id.tvMetricValue).text = m.value
+            val sub = cell.findViewById<TextView>(R.id.tvMetricSub)
+            if (m.sub != null) { sub.text = m.sub; sub.visibility = View.VISIBLE } else sub.visibility = View.GONE
             val lp = GridLayout.LayoutParams().apply {
                 width = 0
                 columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
