@@ -26,7 +26,8 @@ class CityWeatherViewModel(app: Application) : AndroidViewModel(app) {
                 val units = unitsStore.units
                 val cur = repo.current(lat, lon, units)
                 val fc = repo.forecast(lat, lon, units)
-                UiState.Data(builder.build(cur, fc, place))
+                val air = runCatching { repo.airPollution(lat, lon) }.getOrNull()
+                UiState.Data(builder.build(cur, fc, place, air))
             } catch (e: Exception) {
                 UiState.Error(e.message ?: "Unknown error")
             }

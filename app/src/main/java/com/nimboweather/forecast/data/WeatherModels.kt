@@ -48,3 +48,12 @@ data class Sys(
     val sunset: Long = 0L,
     val country: String? = null
 )
+
+@Serializable
+data class AirPollutionResponse(val list: List<AirPollutionItem> = emptyList())
+
+@Serializable
+data class AirPollutionItem(val components: AirComponents? = null)
+
+@Serializable
+data class AirComponents(@SerialName("pm2_5") val pm25: Double? = null)

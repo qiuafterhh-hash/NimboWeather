@@ -1,7 +1,10 @@
 package com.nimboweather.forecast.ui.home
 
 import android.content.Context
+import com.nimboweather.forecast.data.AirPollutionResponse
+import com.nimboweather.forecast.data.AirQualityIndex
 import com.nimboweather.forecast.data.CurrentWeather
+import com.nimboweather.forecast.data.MoonPhase
 import com.nimboweather.forecast.data.DailyForecast
 import com.nimboweather.forecast.data.ForecastResponse
 import com.nimboweather.forecast.data.HourlyForecast
@@ -26,7 +29,7 @@ class WeatherCardsBuilder(private val context: Context) {
     private val dateIn = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private val dayOut = SimpleDateFormat("EEE", Locale.US)
 
-    fun build(cur: CurrentWeather, fc: ForecastResponse, place: String): List<HomeCard> {
+    fun build(cur: CurrentWeather, fc: ForecastResponse, place: String, air: AirPollutionResponse? = null): List<HomeCard> {
         val sym = unitsStore.tempSymbol()
         val hourlyAll = mapHourly(fc, Int.MAX_VALUE)
         val daily = mapDaily(fc)
@@ -67,7 +70,7 @@ class WeatherCardsBuilder(private val context: Context) {
                 )
                 HomeCardType.HOURLY -> hourlyAll.take(8).takeIf { it.isNotEmpty() }?.let { HomeCard.Hourly(it) }
                 HomeCardType.PRECIP -> precip.takeIf { it.isNotEmpty() }?.let { HomeCard.Precip(it) }
-                HomeCardType.DETAILS -> HomeCard.Details(buildMetrics(cur, sym))
+                HomeCardType.DETAILS -> HomeCard.Details(buildMetrics(cur, sym, air))
                 HomeCardType.SUNRISE_SUNSET -> cur.sys?.takeIf { it.sunrise > 0 }?.let {
                     HomeCard.SunriseSunset(fmtTime(it.sunrise, cur.timezone), fmtTime(it.sunset, cur.timezone))
                 }
@@ -82,8 +85,14 @@ class WeatherCardsBuilder(private val context: Context) {
         return dirs[((deg / 22.5).roundToInt() % 16 + 16) % 16]
     }
 
-    private fun buildMetrics(cur: CurrentWeather, sym: String): List<Metric> {
+    private fun buildMetrics(cur: CurrentWeather, sym: String, air: AirPollutionResponse?): List<Metric> {
         val list = mutableListOf<Metric>()
+        air?.list?.firstOrNull()?.components?.pm25?.let { pm ->
+            val aqi = AirQualityIndex.usAqiFromPm25(pm)
+            list.add(Metric("Air quality", aqi.toString(), R.drawable.ic_aqi, AirQualityIndex.category(aqi)))
+        }
+        val now = System.currentTimeMillis()
+        list.add(Metric("Moon", MoonPhase.phaseName(now), R.drawable.ic_moon, "${(MoonPhase.illumination(now) * 100).roundToInt()}% lit"))
         cur.sys?.takeIf { it.sunrise > 0 }?.let {
             list.add(Metric("Sunrise", fmtTime(it.sunrise, cur.timezone), R.drawable.ic_sunrise, "Sunset ${fmtTime(it.sunset, cur.timezone)}"))
         }

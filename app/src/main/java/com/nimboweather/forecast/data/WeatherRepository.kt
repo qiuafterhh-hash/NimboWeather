@@ -12,6 +12,9 @@ class WeatherRepository(
     suspend fun forecast(lat: Double, lon: Double, units: String): ForecastResponse =
         api.forecast(lat = lat, lon = lon, apiKey = apiKey, units = units)
 
+    suspend fun airPollution(lat: Double, lon: Double): AirPollutionResponse =
+        api.airPollution(lat = lat, lon = lon, apiKey = apiKey)
+
     suspend fun geocode(query: String): List<GeoLocation> =
         api.geocode(query = query, apiKey = apiKey, limit = 5)
 
