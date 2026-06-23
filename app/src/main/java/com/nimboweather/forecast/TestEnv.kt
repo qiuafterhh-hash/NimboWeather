@@ -1,16 +1,14 @@
 package com.nimboweather.forecast
 
 /**
- * Runtime "automation" switch. When active, the app suppresses behaviours that
- * make UI test harnesses non-deterministic — the cold-start App-Open ad (steals
- * window focus) and the continuous WeatherFxView redraw loop (keeps the view
- * hierarchy from ever going idle). Production behaviour is unchanged.
+ * Runtime "automation" switch. When [active], the app renders WeatherFxView as a
+ * single static frame instead of an endless redraw loop, so Espresso can reach an
+ * idle view hierarchy. Set from instrumented tests (directly) or via the
+ * `nimbo_test` launch extra (SplashActivity). Production behaviour is unchanged.
  *
- * Detected two ways:
- *  - [espressoPresent]: instrumented (connectedAndroidTest) runs load Espresso
- *    into the app process, so its presence on the classpath flags a test run.
- *  - [forced]: black-box runners (Maestro / `adb am start`) launch the app with
- *    the `nimbo_test` boolean extra, which SplashActivity flips on here.
+ * Note: the cold-start App-Open ad — the other thing that breaks UI tests (it
+ * steals window focus) — is gated separately on [BuildConfig.DEBUG] so it is off
+ * in every test build without needing this flag plumbed through each runner.
  */
 object TestEnv {
 
@@ -18,14 +16,5 @@ object TestEnv {
     var forced = false
 
     val active: Boolean
-        get() = forced || espressoPresent
-
-    private val espressoPresent: Boolean by lazy {
-        try {
-            Class.forName("androidx.test.espresso.Espresso")
-            true
-        } catch (_: Throwable) {
-            false
-        }
-    }
+        get() = forced
 }

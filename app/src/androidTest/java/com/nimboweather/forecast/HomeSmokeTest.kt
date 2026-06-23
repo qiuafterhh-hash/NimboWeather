@@ -13,6 +13,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.rule.GrantPermissionRule
 import com.nimboweather.forecast.ui.MainActivity
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -34,6 +35,13 @@ class HomeSmokeTest {
         Manifest.permission.ACCESS_COARSE_LOCATION,
         Manifest.permission.POST_NOTIFICATIONS
     )
+
+    @Before
+    fun enableTestMode() {
+        // Render WeatherFxView statically so the hierarchy reaches idle. (The
+        // App-Open ad is already off in debug via BuildConfig.DEBUG.)
+        com.nimboweather.forecast.TestEnv.forced = true
+    }
 
     @Test
     fun homeShell_isDisplayed() {
