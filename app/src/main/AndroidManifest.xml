@@ -78,6 +78,12 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".ui.radar.RadarActivity"
+            android:exported="false"
+            android:launchMode="singleTask"
+            android:screenOrientation="portrait" />
+
+        <activity
             android:name=".ui.ads.NativeFullscreenActivity"
             android:exported="false"
             android:launchMode="singleTop"

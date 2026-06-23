@@ -10,6 +10,7 @@ import com.nimboweather.forecast.ui.home.HomeCardType
 object CardLayoutConfig {
     fun order(): List<HomeCardType> = listOf(
         HomeCardType.CURRENT,
+        HomeCardType.NOWCAST,
         HomeCardType.HOURLY,
         HomeCardType.PRECIP,
         HomeCardType.DAILY,

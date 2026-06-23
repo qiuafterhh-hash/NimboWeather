@@ -67,7 +67,7 @@ class MainActivity : AppCompatActivity(), CityHost {
             binding.drawerLayout.openDrawer(GravityCompat.START)
         }
         binding.btnHeatmap.setOnClickListener {
-            android.widget.Toast.makeText(this, R.string.heatmap_coming_soon, android.widget.Toast.LENGTH_SHORT).show()
+            startActivity(android.content.Intent(this, com.nimboweather.forecast.ui.radar.RadarActivity::class.java))
         }
         binding.btnAddCity.setOnClickListener {
             binding.drawerLayout.closeDrawer(GravityCompat.START)

@@ -10,6 +10,12 @@
     <string name="daily_label">每日预报</string>
     <string name="details_label">详情</string>
     <string name="precip_label">降水概率</string>
+    <string name="nowcast_label">未来一小时</string>
+    <string name="back">返回</string>
+    <string name="radar_title">降水雷达 · 实验版</string>
+    <string name="radar_play_pause">播放 / 暂停</string>
+    <string name="radar_attribution">© OpenStreetMap · RainViewer</string>
+    <string name="radar_unavailable">雷达暂时不可用</string>
     <string name="sun_label">日出与日落</string>
     <string name="sunrise">日出</string>
     <string name="sunset">日落</string>

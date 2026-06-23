@@ -31,6 +31,7 @@ class HomeCardRenderer(private val context: Context) {
         cards.forEach { card ->
             val view = when (card) {
                 is HomeCard.Current -> dialCard(container, card)
+                is HomeCard.Nowcast -> nowcastCard(container, card)
                 is HomeCard.Hourly -> hourlyCard(container, card)
                 is HomeCard.Precip -> precipCard(container, card)
                 is HomeCard.Details -> detailsCard(container, card)
@@ -63,6 +64,13 @@ class HomeCardRenderer(private val context: Context) {
             windDeg = c.windDeg
         )
         v.setOnClickListener { openDetail() }
+        return v
+    }
+
+    private fun nowcastCard(parent: ViewGroup, c: HomeCard.Nowcast): View {
+        val v = inflate(R.layout.card_nowcast, parent)
+        v.findViewById<TextView>(R.id.tvNowcastHeadline).text = c.headline
+        v.findViewById<NowcastCurveView>(R.id.nowcastCurve).series = c.series
         return v
     }
 
