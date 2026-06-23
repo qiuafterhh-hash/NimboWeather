@@ -105,39 +105,19 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
+          # NOTE: android-emulator-runner executes each script LINE in its own
+          # `sh -c`, so shell variables do NOT persist across lines. Each stage
+          # therefore records its exit code to a file, and the final line sums
+          # them — running every layer while still failing the job if any failed.
           script: |
-            # Run every layer and aggregate — Espresso / Maestro / monkey are
-            # independent signals, so one failing must not skip the others.
-            set +e
-            export PATH="$PATH:$HOME/.maestro/bin"
             adb logcat -c || true
-            fail=0
-
-            echo "::group::Espresso instrumented tests"
-            ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace || fail=1
-            echo "::endgroup::"
-
-            echo "::group::Install debug APK for black-box testing"
-            ./gradlew installDebug --no-daemon || fail=1
-            echo "::endgroup::"
-
-            echo "::group::Maestro functional UI flows"
-            maestro test .maestro --format junit --output maestro-report.xml || fail=1
-            echo "::endgroup::"
-
-            echo "::group::Monkey stability (1500 events)"
-            # Warm the process with the test flag so ads stay out of monkey's way,
-            # then fuzz. The static flag persists for the life of the process.
-            adb shell am start -n com.nimboweather.forecast/.ui.splash.SplashActivity --ez nimbo_test true
-            sleep 3
-            adb shell monkey -p com.nimboweather.forecast --pct-syskeys 0 --throttle 300 -v 1500 > monkey.log 2>&1
-            mc=$?
-            cat monkey.log
-            [ "$mc" -ne 0 ] && fail=1
-            echo "::endgroup::"
-
+            echo "::group::Espresso instrumented tests"; ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace; echo $? > "$HOME/r_espresso"; echo "::endgroup::"
+            echo "::group::Install debug APK"; ./gradlew installDebug --no-daemon; echo $? > "$HOME/r_install"; echo "::endgroup::"
+            echo "::group::Maestro functional UI flows"; maestro test .maestro --format junit --output maestro-report.xml; echo $? > "$HOME/r_maestro"; echo "::endgroup::"
+            echo "::group::Monkey stability (1500 events)"; adb shell monkey -p com.nimboweather.forecast --pct-syskeys 0 --throttle 300 -v 1500 > monkey.log 2>&1; echo $? > "$HOME/r_monkey"; cat monkey.log; echo "::endgroup::"
             adb logcat -d > logcat.txt || true
-            exit $fail
+            echo "RESULTS espresso=$(cat $HOME/r_espresso) install=$(cat $HOME/r_install) maestro=$(cat $HOME/r_maestro) monkey=$(cat $HOME/r_monkey)"
+            exit $(( $(cat "$HOME/r_espresso" 2>/dev/null || echo 1) + $(cat "$HOME/r_install" 2>/dev/null || echo 1) + $(cat "$HOME/r_maestro" 2>/dev/null || echo 1) + $(cat "$HOME/r_monkey" 2>/dev/null || echo 1) ))
 
       - name: Upload instrumented reports
         if: always()
