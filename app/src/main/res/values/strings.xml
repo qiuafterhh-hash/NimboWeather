@@ -39,4 +39,5 @@
     <string name="heatmap">Weather map</string>
     <string name="heatmap_coming_soon">Weather map coming soon</string>
     <string name="units_label">Units (°C / °F)</string>
+    <string name="widget_description">Current weather, hi/lo and air quality for a chosen city</string>
 </resources>

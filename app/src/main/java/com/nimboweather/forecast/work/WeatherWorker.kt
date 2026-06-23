@@ -3,6 +3,7 @@ package com.nimboweather.forecast.work
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.nimboweather.forecast.data.DailyHiLo
 import com.nimboweather.forecast.data.WeatherCache
 import com.nimboweather.forecast.data.WeatherRepository
 import com.nimboweather.forecast.data.WeatherSnapshot
@@ -30,13 +31,22 @@ class WeatherWorker(
         val place = target?.display() ?: "London"
 
         return try {
-            val cur = WeatherRepository().current(lat, lon, units.units)
+            val repo = WeatherRepository()
+            val cur = repo.current(lat, lon, units.units)
+            val now = System.currentTimeMillis()
+            val hiLo = runCatching { repo.forecast(lat, lon, units.units) }
+                .getOrNull()
+                ?.let { DailyHiLo.inWindow(it.list, now / 1000, now / 1000 + 24 * 60 * 60L) }
             val snap = WeatherSnapshot(
                 city = place,
                 temp = cur.main?.temp?.roundToInt() ?: 0,
                 symbol = units.tempSymbol(),
                 condition = cur.weather.firstOrNull()?.description?.replaceFirstChar { it.uppercase() } ?: "",
-                icon = cur.weather.firstOrNull()?.icon
+                icon = cur.weather.firstOrNull()?.icon,
+                hi = hiLo?.hi,
+                lo = hiLo?.lo,
+                feelsLike = cur.main?.feelsLike?.roundToInt(),
+                updatedAt = now
             )
             WeatherCache(applicationContext).save(snap)
 
@@ -52,7 +62,10 @@ class WeatherWorker(
                 Notifications.postAlert(applicationContext, "Severe weather alert", "$what in $place")
             }
 
+            // Re-render fallback widgets now, and re-fetch each configured widget's
+            // own city so they update on this periodic cadence (not just hourly onUpdate).
             WeatherWidgetProvider.refresh(applicationContext)
+            WeatherWidgetProvider.enqueueRefreshAll(applicationContext)
             Result.success()
         } catch (e: Exception) {
             Result.retry()
