@@ -90,14 +90,19 @@ class MainActivity : AppCompatActivity(), CityHost {
             override fun onPageSelected(position: Int) = updateTitle(position)
         })
 
-        val perms = mutableListOf(
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
-        )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            perms.add(Manifest.permission.POST_NOTIFICATIONS)
+        // Skip the runtime permission prompt under UI-test automation — perms are
+        // pre-granted there, and launching the request can momentarily steal window
+        // focus and flake Espresso/Maestro.
+        if (!com.nimboweather.forecast.TestEnv.active) {
+            val perms = mutableListOf(
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            )
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                perms.add(Manifest.permission.POST_NOTIFICATIONS)
+            }
+            permLauncher.launch(perms.toTypedArray())
         }
-        permLauncher.launch(perms.toTypedArray())
 
         rebuildPager(keepCurrent = false)
     }

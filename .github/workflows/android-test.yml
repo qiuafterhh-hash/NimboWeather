@@ -73,28 +73,6 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
-      - name: AVD cache
-        uses: actions/cache@v4
-        id: avd-cache
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: avd-${{ matrix.api-level }}
-
-      - name: Create AVD + warm snapshot
-        if: steps.avd-cache.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ matrix.api-level }}
-          target: google_apis
-          arch: x86_64
-          profile: pixel_6
-          force-avd-creation: false
-          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
-          disable-animations: true
-          script: echo "Generated AVD snapshot."
-
       - name: Run instrumented + Maestro + Monkey
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -102,14 +80,21 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: pixel_6
-          force-avd-creation: false
-          emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          force-avd-creation: true
+          # Cold boot (no snapshot) + keyguard dismissal in the script: snapshot-
+          # restored emulators intermittently come up LOCKED, which leaves the
+          # activity window without focus (RootViewWithoutFocusException, and
+          # Maestro can't see the UI either). Cold boot lands unlocked.
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
           # NOTE: android-emulator-runner executes each script LINE in its own
           # `sh -c`, so shell variables do NOT persist across lines. Each stage
           # therefore records its exit code to a file, and the final line sums
           # them — running every layer while still failing the job if any failed.
           script: |
+            adb shell input keyevent 82 || true
+            adb shell wm dismiss-keyguard || true
+            adb shell svc power stayon true || true
             adb logcat -c || true
             echo "::group::Espresso instrumented tests"; ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace; echo $? > "$HOME/r_espresso"; echo "::endgroup::"
             echo "::group::Install debug APK"; ./gradlew installDebug --no-daemon; echo $? > "$HOME/r_install"; echo "::endgroup::"
