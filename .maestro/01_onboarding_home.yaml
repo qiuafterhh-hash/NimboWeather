@@ -4,6 +4,8 @@ name: Onboarding completes and home loads
 # Fresh install state so the first-run onboarding screen appears.
 - launchApp:
     clearState: true
+    arguments:
+      nimbo_test: true
     permissions:
       all: allow
 # Splash (1.2s) -> Onboarding. Dismiss it via the primary CTA if shown.

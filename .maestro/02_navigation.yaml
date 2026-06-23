@@ -2,6 +2,8 @@ appId: com.nimboweather.forecast
 name: Drawer, units toggle, language, swipe, detail navigation
 ---
 - launchApp:
+    arguments:
+      nimbo_test: true
     permissions:
       all: allow
 - runFlow:

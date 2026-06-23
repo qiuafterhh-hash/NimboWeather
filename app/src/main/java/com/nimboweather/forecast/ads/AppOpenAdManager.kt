@@ -17,6 +17,7 @@ class AppOpenAdManager : Application.ActivityLifecycleCallbacks, DefaultLifecycl
     private var currentActivity: Activity? = null
 
     override fun onStart(owner: LifecycleOwner) {
+        if (com.nimboweather.forecast.TestEnv.active) return
         val act = currentActivity ?: return
         if (AdMediator.isShowingFullScreen()) return
         if (act is NativeFullscreenActivity) return

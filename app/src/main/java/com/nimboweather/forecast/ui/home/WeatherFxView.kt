@@ -97,6 +97,9 @@ class WeatherFxView @JvmOverloads constructor(
 
     private fun startLoop() {
         if (fx == Fx.NONE) { running = false; return }
+        // Under UI-test automation, render a single static frame instead of an
+        // endless redraw loop so the view hierarchy can reach idle.
+        if (com.nimboweather.forecast.TestEnv.active) { running = false; invalidate(); return }
         if (!running) { running = true; lastNs = System.nanoTime(); postInvalidateOnAnimation() }
     }
 
