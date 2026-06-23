@@ -1,0 +1,26 @@
+appId: com.nimboweather.forecast
+name: Onboarding completes and home loads
+---
+# Fresh install state so the first-run onboarding screen appears.
+- launchApp:
+    clearState: true
+    permissions:
+      all: allow
+# Splash (1.2s) -> Onboarding. Dismiss it via the primary CTA if shown.
+- runFlow:
+    when:
+      visible:
+        text: "Allow location & continue"
+    commands:
+      - tapOn:
+          text: "Allow location & continue"
+# Home shell must render (independent of weather data loading).
+- assertVisible:
+    id: "viewPager"
+- assertVisible:
+    id: "btnCityList"
+- assertVisible:
+    id: "btnHeatmap"
+# Weather-map button is a stub -> shows a toast, must not crash.
+- tapOn:
+    id: "btnHeatmap"
