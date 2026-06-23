@@ -102,12 +102,16 @@ class WeatherWidgetProvider : AppWidgetProvider() {
 
         private fun bind(context: Context, views: RemoteViews, s: WeatherSnapshot, id: Int) {
             val degree = s.symbol.firstOrNull()?.toString() ?: "°" // "°C" → "°"
+            val appearance = WidgetPrefs(context).getAppearance(id)
 
             views.setTextViewText(R.id.wCity, s.city)
             views.setTextViewText(R.id.wTemp, "${s.temp}${s.symbol}")
             views.setTextViewText(R.id.wCond, s.condition)
             views.setImageViewResource(R.id.wGlyph, WidgetVisuals.glyph(s.icon))
-            views.setInt(R.id.widgetRoot, "setBackgroundResource", WidgetVisuals.background(s.icon))
+            // Scene art on the dedicated background ImageView; per-widget opacity (0 = transparent,
+            // wallpaper shows; 255 = solid scene) via the remotable ImageView.setImageAlpha.
+            views.setImageViewResource(R.id.widgetBg, WidgetVisuals.background(s.icon))
+            views.setInt(R.id.widgetBg, "setImageAlpha", appearance.imageAlpha())
 
             // hi/lo + feels-like (medium/large)
             val hiLo = buildString {

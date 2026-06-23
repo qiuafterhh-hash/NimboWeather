@@ -1,77 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:id="@+id/widgetRoot"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@drawable/widget_bg_clear_day"
-    android:orientation="vertical"
-    android:padding="14dp">
+    android:layout_height="match_parent">
 
-    <!-- Top row: city + glyph -->
-    <LinearLayout
+    <!-- Scene background; per-widget alpha via WidgetAppearance.bgOpacity (setImageAlpha). -->
+    <ImageView
+        android:id="@+id/widgetBg"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:scaleType="fitXY"
+        android:src="@drawable/widget_bg_clear_day"
+        android:contentDescription="@null" />
 
-        <TextView
-            android:id="@+id/wCity"
-            android:layout_width="0dp"
+    <LinearLayout
+        android:id="@+id/widgetRoot"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <!-- Top row: city + glyph -->
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/wCity"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:maxLines="1"
+                android:ellipsize="end"
+                android:textColor="#FFFFFF"
+                android:textSize="14sp" />
+
+            <ImageView
+                android:id="@+id/wGlyph"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:src="@drawable/ic_wx_sun"
+                android:contentDescription="@null" />
+        </LinearLayout>
+
+        <!-- Temp -->
+        <TextView
+            android:id="@+id/wTemp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textColor="#FFFFFF"
+            android:textSize="40sp"
+            android:textStyle="bold" />
+
+        <!-- Condition -->
+        <TextView
+            android:id="@+id/wCond"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:maxLines="1"
             android:ellipsize="end"
-            android:textColor="#FFFFFF"
-            android:textSize="14sp" />
+            android:textColor="#E6FFFFFF"
+            android:textSize="13sp" />
 
-        <ImageView
-            android:id="@+id/wGlyph"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@drawable/ic_wx_sun"
-            android:contentDescription="@null" />
+        <!-- hi/lo + feels-like -->
+        <TextView
+            android:id="@+id/wHiLo"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="#E6FFFFFF"
+            android:textSize="12sp" />
+
+        <!-- spacer -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <!-- Updated time -->
+        <TextView
+            android:id="@+id/wUpdated"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#99FFFFFF"
+            android:textSize="10sp" />
     </LinearLayout>
-
-    <!-- Temp -->
-    <TextView
-        android:id="@+id/wTemp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="2dp"
-        android:textColor="#FFFFFF"
-        android:textSize="40sp"
-        android:textStyle="bold" />
-
-    <!-- Condition -->
-    <TextView
-        android:id="@+id/wCond"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:maxLines="1"
-        android:ellipsize="end"
-        android:textColor="#E6FFFFFF"
-        android:textSize="13sp" />
-
-    <!-- hi/lo + feels-like -->
-    <TextView
-        android:id="@+id/wHiLo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:textColor="#E6FFFFFF"
-        android:textSize="12sp" />
-
-    <!-- spacer -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <!-- Updated time -->
-    <TextView
-        android:id="@+id/wUpdated"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textColor="#99FFFFFF"
-        android:textSize="10sp" />
-</LinearLayout>
+</FrameLayout>
