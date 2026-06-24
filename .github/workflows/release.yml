@@ -1,0 +1,60 @@
+name: Release
+
+# Cut a release by pushing a semver tag, e.g.:  git tag v0.1.0 && git push origin v0.1.0
+on:
+  push:
+    tags: [ 'v*' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write   # needed to create the GitHub Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history + tags so build.gradle can derive the version
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+
+      - name: Install Android SDK packages
+        run: |
+          SDK="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDK" --licenses >/dev/null 2>&1 || true
+          "$SDK" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Inject OpenWeatherMap key
+        run: echo "OPENWEATHER_API_KEY=${{ secrets.OPENWEATHER_API_KEY }}" > local.properties
+      - run: chmod +x ./gradlew
+
+      # Fast gate. The full instrumented suite (Espresso/Maestro/monkey) already
+      # ran as a required check before this commit reached main.
+      - name: Unit tests
+        run: ./gradlew testDebugUnitTest --no-daemon --stacktrace
+
+      - name: Build APK
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Stage versioned APK
+        run: |
+          V="${GITHUB_REF_NAME#v}"
+          cp app/build/outputs/apk/debug/app-debug.apk "NimboWeather-${V}.apk"
+          ls -la NimboWeather-*.apk
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "NimboWeather ${{ github.ref_name }}"
+          generate_release_notes: true   # auto notes from merged PRs/commits since last tag
+          files: NimboWeather-*.apk
+          body: |
+            Automated release built from `${{ github.ref_name }}`.
+
+            > ⚠️ The attached APK is **debug-signed** (production signing is pending M5).
+            > Install for testing with `adb install NimboWeather-<version>.apk`.
