@@ -34,6 +34,7 @@
     <string name="onboarding_skip">Maybe later</string>
     <string name="persistent_notif_label">Persistent notification</string>
     <string name="widget_config_title">Choose city for this widget</string>
+    <string name="widget_opacity_label">Background opacity</string>
     <string name="language_label">Language</string>
     <string name="language_dialog_title">Choose language</string>
     <string name="language_system">System default</string>
@@ -45,4 +46,5 @@
     <string name="heatmap">Weather map</string>
     <string name="heatmap_coming_soon">Weather map coming soon</string>
     <string name="units_label">Units (°C / °F)</string>
+    <string name="widget_description">Current weather, hi/lo and air quality for a chosen city</string>
 </resources>

@@ -45,4 +45,5 @@
     <string name="heatmap">热力图</string>
     <string name="heatmap_coming_soon">热力图功能敬请期待</string>
     <string name="units_label">单位（°C / °F）</string>
+    <string name="widget_description">所选城市的实时天气、最高/最低温与空气质量</string>
 </resources>
