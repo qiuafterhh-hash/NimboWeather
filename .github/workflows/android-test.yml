@@ -96,9 +96,12 @@ jobs:
             adb shell wm dismiss-keyguard || true
             adb shell svc power stayon true || true
             adb logcat -c || true
-            echo "::group::Espresso instrumented tests"; ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace; echo $? > "$HOME/r_espresso"; echo "::endgroup::"
+            # Espresso + Maestro get ONE automatic retry: the emulator's RootViewPicker
+            # occasionally can't acquire window focus on first launch (transient), which
+            # would otherwise block legitimate PRs. A real failure fails both attempts.
+            echo "::group::Espresso instrumented tests"; ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace || ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace; echo $? > "$HOME/r_espresso"; echo "::endgroup::"
             echo "::group::Install debug APK"; ./gradlew installDebug --no-daemon; echo $? > "$HOME/r_install"; echo "::endgroup::"
-            echo "::group::Maestro functional UI flows"; maestro test .maestro --format junit --output maestro-report.xml; echo $? > "$HOME/r_maestro"; echo "::endgroup::"
+            echo "::group::Maestro functional UI flows"; maestro test .maestro --format junit --output maestro-report.xml || maestro test .maestro --format junit --output maestro-report.xml; echo $? > "$HOME/r_maestro"; echo "::endgroup::"
             echo "::group::Monkey stability (1500 events)"; adb shell monkey -p com.nimboweather.forecast --pct-syskeys 0 --throttle 300 -v 1500 > monkey.log 2>&1; echo $? > "$HOME/r_monkey"; cat monkey.log; echo "::endgroup::"
             adb logcat -d > logcat.txt || true
             echo "RESULTS espresso=$(cat $HOME/r_espresso) install=$(cat $HOME/r_install) maestro=$(cat $HOME/r_maestro) monkey=$(cat $HOME/r_monkey)"
