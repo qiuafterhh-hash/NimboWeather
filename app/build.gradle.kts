@@ -82,6 +82,9 @@ dependencies {
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("io.coil-kt:coil:2.7.0")
 
+    // L2 weather radar — OpenStreetMap base + RainViewer tile overlay (no Google Maps key)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+
     testImplementation("junit:junit:4.13.2")
 
     // Instrumented (on-device) UI tests — Espresso + AndroidX Test

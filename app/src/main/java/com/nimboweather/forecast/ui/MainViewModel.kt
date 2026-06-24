@@ -123,6 +123,7 @@ class MainViewModel(app: Application) : AndroidViewModel(app) {
                     windText = "${degToCompass(cur.wind?.deg)} · ${(cur.wind?.speed ?: 0.0).roundToInt()} ${unitsStore.speedSymbol()}",
                     windDeg = cur.wind?.deg
                 )
+                HomeCardType.NOWCAST -> null // nowcast is fetched only on the per-city page (CityWeatherViewModel)
                 HomeCardType.HOURLY -> hourlyAll.take(8).takeIf { it.isNotEmpty() }?.let { HomeCard.Hourly(it) }
                 HomeCardType.PRECIP -> precip.takeIf { it.isNotEmpty() }?.let { HomeCard.Precip(it) }
                 HomeCardType.DETAILS -> HomeCard.Details(buildMetrics(cur, sym))

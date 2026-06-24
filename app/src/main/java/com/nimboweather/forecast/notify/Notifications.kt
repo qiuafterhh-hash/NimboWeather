@@ -16,10 +16,12 @@ object Notifications {
     private const val CH_DAILY = "weather_daily"
     private const val CH_PERSIST = "weather_persistent"
     private const val CH_ALERT = "weather_alert"
+    private const val CH_NOWCAST = "weather_nowcast"
 
     private const val ID_DAILY = 1001
     private const val ID_PERSIST = 2001
     private const val ID_ALERT = 3001
+    private const val ID_NOWCAST = 4001
 
     fun ensureChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -35,6 +37,10 @@ object Notifications {
         mgr.createNotificationChannel(
             NotificationChannel(CH_ALERT, "Severe weather alerts", NotificationManager.IMPORTANCE_HIGH)
                 .apply { description = "Storms and severe conditions" }
+        )
+        mgr.createNotificationChannel(
+            NotificationChannel(CH_NOWCAST, "Rain nowcast", NotificationManager.IMPORTANCE_DEFAULT)
+                .apply { description = "Heads-up when rain is about to start near you" }
         )
     }
 
@@ -96,6 +102,21 @@ object Notifications {
             .setAutoCancel(true)
             .build()
         safeNotify(context, ID_ALERT, n)
+    }
+
+    /** Rain nowcast heads-up ("rain starting soon"). Medium priority — informative, not alarming. */
+    fun postNowcast(context: Context, title: String, text: String) {
+        if (!canNotify(context)) return
+        ensureChannels(context)
+        val n = NotificationCompat.Builder(context, CH_NOWCAST)
+            .setSmallIcon(R.drawable.ic_location)
+            .setContentTitle(title)
+            .setContentText(text)
+            .setContentIntent(contentPi(context))
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true)
+            .build()
+        safeNotify(context, ID_NOWCAST, n)
     }
 
     private fun safeNotify(context: Context, id: Int, n: android.app.Notification) {

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.nimboweather.forecast.data.WeatherRepository
+import com.nimboweather.forecast.data.nowcast.NowcastRepository
 import com.nimboweather.forecast.prefs.UnitsStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.launch
 class CityWeatherViewModel(app: Application) : AndroidViewModel(app) {
 
     private val repo = WeatherRepository()
+    private val nowcastRepo = NowcastRepository()
     private val builder = WeatherCardsBuilder(app)
     private val unitsStore = UnitsStore(app)
 
@@ -27,7 +29,8 @@ class CityWeatherViewModel(app: Application) : AndroidViewModel(app) {
                 val cur = repo.current(lat, lon, units)
                 val fc = repo.forecast(lat, lon, units)
                 val air = runCatching { repo.airPollution(lat, lon) }.getOrNull()
-                UiState.Data(builder.build(cur, fc, place, air))
+                val nowcast = nowcastRepo.nowcast(lat, lon)
+                UiState.Data(builder.build(cur, fc, place, air, nowcast))
             } catch (e: Exception) {
                 UiState.Error(e.message ?: "Unknown error")
             }

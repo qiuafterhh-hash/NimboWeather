@@ -10,6 +10,12 @@
     <string name="daily_label">Daily forecast</string>
     <string name="details_label">Details</string>
     <string name="precip_label">Precipitation</string>
+    <string name="nowcast_label">Next hour</string>
+    <string name="back">Back</string>
+    <string name="radar_title">Rain radar · Beta</string>
+    <string name="radar_play_pause">Play / pause</string>
+    <string name="radar_attribution">© OpenStreetMap · RainViewer</string>
+    <string name="radar_unavailable">Radar unavailable right now</string>
     <string name="sun_label">Sunrise &amp; Sunset</string>
     <string name="sunrise">Sunrise</string>
     <string name="sunset">Sunset</string>
