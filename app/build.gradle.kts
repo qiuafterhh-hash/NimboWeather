@@ -13,6 +13,30 @@ val localProps = Properties().apply {
 }
 val owmKey: String = localProps.getProperty("OPENWEATHER_API_KEY") ?: ""
 
+// --- Version management: derive versionName/versionCode from the latest git tag ---
+// Tag `vX.Y.Z` -> versionName "X.Y.Z", versionCode X*1_000_000 + Y*1_000 + Z (monotonic).
+// Falls back to FALLBACK_VERSION_NAME when no tag is reachable (e.g. shallow CI clones
+// for debug builds); the release workflow checks out with full history so tags resolve.
+val FALLBACK_VERSION_NAME = "0.1.0"
+
+fun latestGitTag(): String? = try {
+    val proc = ProcessBuilder("git", "describe", "--tags", "--abbrev=0")
+        .directory(rootDir)
+        .redirectErrorStream(true)
+        .start()
+    val out = proc.inputStream.bufferedReader().readText().trim()
+    if (proc.waitFor() == 0 && out.isNotEmpty()) out else null
+} catch (_: Exception) {
+    null
+}
+
+val appVersionName: String = (latestGitTag()?.removePrefix("v") ?: FALLBACK_VERSION_NAME)
+
+val appVersionCode: Int = Regex("""(\d+)\.(\d+)\.(\d+)""").find(appVersionName)?.let { m ->
+    val (maj, min, pat) = m.destructured
+    maj.toInt() * 1_000_000 + min.toInt() * 1_000 + pat.toInt()
+} ?: 1
+
 android {
     namespace = "com.nimboweather.forecast"
     compileSdk = 35
@@ -21,9 +45,10 @@ android {
         applicationId = "com.nimboweather.forecast"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
         buildConfigField("String", "OPENWEATHER_API_KEY", "\"$owmKey\"")
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
@@ -81,5 +106,15 @@ dependencies {
     implementation("androidx.drawerlayout:drawerlayout:1.2.0")
     implementation("io.coil-kt:coil:2.7.0")
 
+    // L2 weather radar — OpenStreetMap base + RainViewer tile overlay (no Google Maps key)
+    implementation("org.osmdroid:osmdroid-android:6.1.18")
+
     testImplementation("junit:junit:4.13.2")
+
+    // Instrumented (on-device) UI tests — Espresso + AndroidX Test
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
+    androidTestImplementation("androidx.test:rules:1.6.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+    androidTestImplementation("androidx.test.espresso:espresso-contrib:3.6.1")
 }

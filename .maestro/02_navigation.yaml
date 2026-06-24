@@ -1,0 +1,51 @@
+appId: com.nimboweather.forecast
+name: Drawer, units toggle, language, swipe, detail navigation
+---
+- launchApp:
+    arguments:
+      nimbo_test: true
+    permissions:
+      all: allow
+- runFlow:
+    when:
+      visible:
+        text: "Allow location & continue"
+    commands:
+      - tapOn:
+          text: "Allow location & continue"
+- assertVisible:
+    id: "btnCityList"
+
+# --- Drawer + settings controls ---
+- tapOn:
+    id: "btnCityList"
+- assertVisible:
+    id: "btnAddCity"
+- assertVisible:
+    id: "switchUnits"
+- assertVisible:
+    id: "switchPersistent"
+
+# Toggle °C/°F units (rebuilds the pager).
+- tapOn:
+    id: "switchUnits"
+
+# Language dialog opens and dismisses (closes the drawer).
+- tapOn:
+    id: "tvLanguage"
+- assertVisible: "Choose language"
+- tapOn: "System default"
+
+# --- Swipe between city pages on the home screen ---
+- swipe:
+    direction: LEFT
+- swipe:
+    direction: RIGHT
+
+# --- Open detail by tapping the compass dial, then return ---
+- tapOn:
+    id: "dial"
+    optional: true
+- back
+- assertVisible:
+    id: "btnCityList"

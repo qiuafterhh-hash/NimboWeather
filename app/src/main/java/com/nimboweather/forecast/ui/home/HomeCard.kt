@@ -4,7 +4,7 @@ import com.nimboweather.forecast.data.DailyForecast
 import com.nimboweather.forecast.data.HourlyForecast
 
 /** Card types that can appear in the home feed (configurable order). */
-enum class HomeCardType { CURRENT, HOURLY, PRECIP, DETAILS, SUNRISE_SUNSET, DAILY }
+enum class HomeCardType { CURRENT, NOWCAST, HOURLY, PRECIP, DETAILS, SUNRISE_SUNSET, DAILY }
 
 sealed interface HomeCard {
     /** Hero — rendered as the radial compass dial. */
@@ -22,6 +22,9 @@ sealed interface HomeCard {
         val windText: String,
         val windDeg: Int? = null
     ) : HomeCard
+
+    /** Short-term precipitation nowcast: a plain-language headline + the 15-min mm series for the curve. */
+    data class Nowcast(val headline: String, val series: List<Double>) : HomeCard
 
     data class Hourly(val items: List<HourlyForecast>) : HomeCard
     data class Daily(val items: List<DailyForecast>) : HomeCard

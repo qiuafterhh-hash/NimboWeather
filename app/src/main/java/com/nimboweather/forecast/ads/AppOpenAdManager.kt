@@ -17,6 +17,9 @@ class AppOpenAdManager : Application.ActivityLifecycleCallbacks, DefaultLifecycl
     private var currentActivity: Activity? = null
 
     override fun onStart(owner: LifecycleOwner) {
+        // Never auto-pop the App-Open ad in debug/test builds — it steals window
+        // focus and breaks UI test harnesses. Release builds are unaffected.
+        if (com.nimboweather.forecast.BuildConfig.DEBUG || com.nimboweather.forecast.TestEnv.active) return
         val act = currentActivity ?: return
         if (AdMediator.isShowingFullScreen()) return
         if (act is NativeFullscreenActivity) return

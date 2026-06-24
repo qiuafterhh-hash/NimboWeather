@@ -5,6 +5,8 @@ import com.nimboweather.forecast.data.AirPollutionResponse
 import com.nimboweather.forecast.data.AirQualityIndex
 import com.nimboweather.forecast.data.CurrentWeather
 import com.nimboweather.forecast.data.MoonPhase
+import com.nimboweather.forecast.data.Nowcast as NowcastLogic
+import com.nimboweather.forecast.data.nowcast.NowcastResult
 import com.nimboweather.forecast.data.DailyForecast
 import com.nimboweather.forecast.data.ForecastResponse
 import com.nimboweather.forecast.data.HourlyForecast
@@ -29,7 +31,7 @@ class WeatherCardsBuilder(private val context: Context) {
     private val dateIn = SimpleDateFormat("yyyy-MM-dd", Locale.US)
     private val dayOut = SimpleDateFormat("EEE", Locale.US)
 
-    fun build(cur: CurrentWeather, fc: ForecastResponse, place: String, air: AirPollutionResponse? = null): List<HomeCard> {
+    fun build(cur: CurrentWeather, fc: ForecastResponse, place: String, air: AirPollutionResponse? = null, nowcast: NowcastResult? = null): List<HomeCard> {
         val sym = unitsStore.tempSymbol()
         val hourlyAll = mapHourly(fc, Int.MAX_VALUE)
         val daily = mapDaily(fc)
@@ -68,6 +70,9 @@ class WeatherCardsBuilder(private val context: Context) {
                     windText = "${degToCompass(cur.wind?.deg)} · ${(cur.wind?.speed ?: 0.0).roundToInt()} ${unitsStore.speedSymbol()}",
                     windDeg = cur.wind?.deg
                 )
+                HomeCardType.NOWCAST -> nowcast?.takeIf { it.series.isNotEmpty() }?.let {
+                    HomeCard.Nowcast(NowcastLogic.headline(it.state), it.series)
+                }
                 HomeCardType.HOURLY -> hourlyAll.take(8).takeIf { it.isNotEmpty() }?.let { HomeCard.Hourly(it) }
                 HomeCardType.PRECIP -> precip.takeIf { it.isNotEmpty() }?.let { HomeCard.Precip(it) }
                 HomeCardType.DETAILS -> HomeCard.Details(buildMetrics(cur, sym, air))

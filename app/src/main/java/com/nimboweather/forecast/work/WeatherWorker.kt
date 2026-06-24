@@ -7,11 +7,14 @@ import com.nimboweather.forecast.data.DailyHiLo
 import com.nimboweather.forecast.data.WeatherCache
 import com.nimboweather.forecast.data.WeatherRepository
 import com.nimboweather.forecast.data.WeatherSnapshot
+import com.nimboweather.forecast.data.nowcast.NowcastAlerts
+import com.nimboweather.forecast.data.nowcast.NowcastRepository
 import com.nimboweather.forecast.notify.Notifications
 import com.nimboweather.forecast.prefs.AppPrefs
 import com.nimboweather.forecast.prefs.CityStore
 import com.nimboweather.forecast.prefs.UnitsStore
 import com.nimboweather.forecast.widget.WeatherWidgetProvider
+import java.util.Calendar
 import kotlin.math.roundToInt
 
 /** Periodic background refresh: fetch current weather for the selected city,
@@ -62,6 +65,8 @@ class WeatherWorker(
                 Notifications.postAlert(applicationContext, "Severe weather alert", "$what in $place")
             }
 
+            maybeNotifyNowcast(prefs, lat, lon)
+
             // Re-render fallback widgets now, and re-fetch each configured widget's
             // own city so they update on this periodic cadence (not just hourly onUpdate).
             WeatherWidgetProvider.refresh(applicationContext)
@@ -69,6 +74,17 @@ class WeatherWorker(
             Result.success()
         } catch (e: Exception) {
             Result.retry()
+        }
+    }
+
+    /** Fetch the rain nowcast for the active location and post a heads-up if one is due. */
+    private suspend fun maybeNotifyNowcast(prefs: AppPrefs, lat: Double, lon: Double) {
+        val result = NowcastRepository().nowcast(lat, lon)
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        val decision = NowcastAlerts.decide(result.state, prefs.nowcastEventKey, hour)
+        prefs.nowcastEventKey = decision.eventKey
+        decision.notification?.let {
+            Notifications.postNowcast(applicationContext, it.title, it.body)
         }
     }
 
