@@ -73,7 +73,14 @@ jobs:
           curl -Ls "https://get.maestro.mobile.dev" | bash
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
-      - name: Run instrumented + Maestro + Monkey
+      # The CI emulator intermittently boots into a state where no app window
+      # gains focus (RootViewWithoutFocusException; Maestro can't see the UI).
+      # Retrying gradle on the SAME emulator doesn't help — a bad boot stays bad.
+      # So: (1) fully disable the lock screen + wake the device before testing,
+      # and (2) if the whole run fails, retry once on a brand-new emulator boot.
+      - name: Tests attempt 1 (fresh emulator)
+        id: t1
+        continue-on-error: true
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: ${{ matrix.api-level }}
@@ -81,19 +88,40 @@ jobs:
           arch: x86_64
           profile: pixel_6
           force-avd-creation: true
-          # Cold boot (no snapshot) + keyguard dismissal in the script: snapshot-
-          # restored emulators intermittently come up LOCKED, which leaves the
-          # activity window without focus (RootViewWithoutFocusException, and
-          # Maestro can't see the UI either). Cold boot lands unlocked.
           emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
           disable-animations: true
-          # NOTE: android-emulator-runner executes each script LINE in its own
-          # `sh -c`, so shell variables do NOT persist across lines. Each stage
-          # therefore records its exit code to a file, and the final line sums
-          # them — running every layer while still failing the job if any failed.
+          # NOTE: android-emulator-runner runs each script LINE in its own `sh -c`,
+          # so shell vars do NOT persist across lines — each stage records its exit
+          # code to a file and the final line sums them.
           script: |
-            adb shell input keyevent 82 || true
+            adb shell input keyevent 224 || true
             adb shell wm dismiss-keyguard || true
+            adb shell locksettings set-disabled true || true
+            adb shell svc power stayon true || true
+            adb logcat -c || true
+            echo "::group::Espresso instrumented tests"; ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace; echo $? > "$HOME/r_espresso"; echo "::endgroup::"
+            echo "::group::Install debug APK"; ./gradlew installDebug --no-daemon; echo $? > "$HOME/r_install"; echo "::endgroup::"
+            echo "::group::Maestro functional UI flows"; maestro test .maestro --format junit --output maestro-report.xml; echo $? > "$HOME/r_maestro"; echo "::endgroup::"
+            echo "::group::Monkey stability (1500 events)"; adb shell monkey -p com.nimboweather.forecast --pct-syskeys 0 --throttle 300 -v 1500 > monkey.log 2>&1; echo $? > "$HOME/r_monkey"; cat monkey.log; echo "::endgroup::"
+            adb logcat -d > logcat.txt || true
+            echo "RESULTS espresso=$(cat $HOME/r_espresso) install=$(cat $HOME/r_install) maestro=$(cat $HOME/r_maestro) monkey=$(cat $HOME/r_monkey)"
+            exit $(( $(cat "$HOME/r_espresso" 2>/dev/null || echo 1) + $(cat "$HOME/r_install" 2>/dev/null || echo 1) + $(cat "$HOME/r_maestro" 2>/dev/null || echo 1) + $(cat "$HOME/r_monkey" 2>/dev/null || echo 1) ))
+
+      - name: Tests attempt 2 (fresh emulator — only if attempt 1 failed)
+        if: steps.t1.outcome == 'failure'
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ matrix.api-level }}
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          force-avd-creation: true
+          emulator-options: -no-snapshot -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none
+          disable-animations: true
+          script: |
+            adb shell input keyevent 224 || true
+            adb shell wm dismiss-keyguard || true
+            adb shell locksettings set-disabled true || true
             adb shell svc power stayon true || true
             adb logcat -c || true
             echo "::group::Espresso instrumented tests"; ./gradlew connectedDebugAndroidTest --no-daemon --stacktrace; echo $? > "$HOME/r_espresso"; echo "::endgroup::"
