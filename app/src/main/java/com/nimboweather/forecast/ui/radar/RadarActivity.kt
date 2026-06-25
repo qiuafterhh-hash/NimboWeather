@@ -24,7 +24,8 @@ import org.osmdroid.views.overlay.TilesOverlay
 class RadarActivity : AppCompatActivity() {
 
     private lateinit var map: MapView
-    private var layerOverlay: TilesOverlay? = null
+    private val layerProvider by lazy { MapTileProviderBasic(applicationContext) }
+    private var overlayAdded = false
     private var activeLayer = WeatherLayer.TEMP
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -56,16 +57,16 @@ class RadarActivity : AppCompatActivity() {
 
     /** Esri World_Topo_Map — z/y/x order + token, so a custom source (not plain XYTileSource). */
     private fun esriBaseSource(): OnlineTileSourceBase =
-        object : OnlineTileSourceBase("EsriTopo", 0, 19, 256, ".png", arrayOf("")) {
+        object : OnlineTileSourceBase("EsriTopo", 0, ESRI_MAX_ZOOM, 256, ".png", arrayOf("")) {
             override fun getTileURLString(i: Long): String = WeatherTiles.esriUrl(
                 z = MapTileIndex.getZoom(i), x = MapTileIndex.getX(i), y = MapTileIndex.getY(i),
                 token = BuildConfig.ESRI_API_KEY
             )
         }
 
-    /** Build the overlay tile source for [layer] (OWM model tiles; RADAR handled in Task 8). */
+    /** OWM model-tile source for [layer]. RADAR is added in a later task; until then it is unused. */
     private fun overlaySource(layer: WeatherLayer): OnlineTileSourceBase {
-        val owm = layer.owmLayer ?: WeatherLayer.PRECIP.owmLayer!!
+        val owm = layer.owmLayer ?: WeatherLayer.PRECIP.owmLayer ?: "precipitation_new"
         return object : OnlineTileSourceBase("owm_$owm", 0, MAX_ZOOM, TILE_SIZE, ".png", arrayOf("")) {
             override fun getTileURLString(i: Long): String = WeatherTiles.owmUrl(
                 layer = owm, z = MapTileIndex.getZoom(i),
@@ -77,18 +78,17 @@ class RadarActivity : AppCompatActivity() {
 
     private fun showLayer(layer: WeatherLayer) {
         activeLayer = layer
-        // Remove the previous overlay so the provider/cache for the old layer is released.
-        layerOverlay?.let { map.overlays.remove(it) }
-        val provider = MapTileProviderBasic(applicationContext).apply {
-            tileSource = overlaySource(layer)
+        layerProvider.tileSource = overlaySource(layer)
+        layerProvider.clearTileCache() // drop the previous layer's cached tiles
+        if (!overlayAdded) {
+            val overlay = TilesOverlay(layerProvider, applicationContext).apply {
+                loadingBackgroundColor = android.graphics.Color.TRANSPARENT
+                loadingLineColor = android.graphics.Color.TRANSPARENT
+            }
+            // Above the base map, below the city marker (the last overlay).
+            map.overlays.add(map.overlays.size - 1, overlay)
+            overlayAdded = true
         }
-        val overlay = TilesOverlay(provider, applicationContext).apply {
-            loadingBackgroundColor = android.graphics.Color.TRANSPARENT
-            loadingLineColor = android.graphics.Color.TRANSPARENT
-        }
-        // Above base, below the city marker (last overlay).
-        map.overlays.add(map.overlays.size - 1, overlay)
-        layerOverlay = overlay
         map.invalidate()
     }
 
@@ -101,5 +101,6 @@ class RadarActivity : AppCompatActivity() {
         private const val DEFAULT_ZOOM = 6.0
         private const val MAX_ZOOM = 12
         private const val TILE_SIZE = 256
+        private const val ESRI_MAX_ZOOM = 19
     }
 }
