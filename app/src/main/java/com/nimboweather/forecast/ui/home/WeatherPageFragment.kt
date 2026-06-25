@@ -43,6 +43,7 @@ class WeatherPageFragment : Fragment() {
                         val icon = current?.icon
                         val nowcastSeries = state.cards.firstNotNullOfOrNull { (it as? HomeCard.Nowcast)?.series }
                         root.background = SkyGradient.drawable(icon)
+                        view.findViewById<WeatherScenicView>(R.id.weatherScenic).setScene(icon)
                         view.findViewById<WeatherFxView>(R.id.weatherFx).setSpec(
                             FxSpec(
                                 scene = FxMapper.sceneFrom(icon),

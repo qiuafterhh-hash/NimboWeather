@@ -5,6 +5,11 @@
     android:layout_height="match_parent"
     android:background="@drawable/bg_sky">
 
+    <com.nimboweather.forecast.ui.home.WeatherScenicView
+        android:id="@+id/weatherScenic"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
     <com.nimboweather.forecast.ui.home.WeatherFxView
         android:id="@+id/weatherFx"
         android:layout_width="match_parent"
