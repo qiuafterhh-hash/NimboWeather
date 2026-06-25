@@ -111,7 +111,13 @@ class HomeCardRenderer(private val context: Context) {
             if (m.sub != null) { sub.text = m.sub; sub.visibility = View.VISIBLE } else sub.visibility = View.GONE
             val lp = GridLayout.LayoutParams().apply {
                 width = 0
-                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
+                // height stays WRAP_CONTENT so each cell still reports its natural
+                // height to the row; FILL row-alignment then stretches the shorter
+                // cell in a row up to the tallest one, so cards whose content length
+                // differs (sub line present vs. absent) stay equal-height and the
+                // outer spacing between cards reads consistently.
+                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, GridLayout.FILL, 1f)
+                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, GridLayout.FILL)
                 setMargins(8, 8, 8, 8)
             }
             grid.addView(cell, lp)
