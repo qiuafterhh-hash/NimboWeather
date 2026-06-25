@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.nimboweather.forecast.databinding.ActivityFindCityBinding
+import com.nimboweather.forecast.ui.applySystemBarInsets
 import com.nimboweather.forecast.prefs.CityStore
 import com.nimboweather.forecast.prefs.SavedCity
 import kotlinx.coroutines.launch
@@ -31,6 +32,7 @@ class FindCityActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityFindCityBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        binding.root.applySystemBarInsets(top = true, bottom = true, left = true, right = true)
         cityStore = CityStore(this)
 
         binding.rvResults.layoutManager = LinearLayoutManager(this)
