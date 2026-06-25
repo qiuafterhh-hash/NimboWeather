@@ -3,12 +3,15 @@ package com.nimboweather.forecast.ui.radar
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.nimboweather.forecast.BuildConfig
 import com.nimboweather.forecast.R
 import com.nimboweather.forecast.data.weathermap.RadarCoverage
 import com.nimboweather.forecast.data.weathermap.WeatherLayer
 import com.nimboweather.forecast.data.weathermap.WeatherTiles
+import com.nimboweather.forecast.data.weathermap.point.PointRepository
 import com.nimboweather.forecast.prefs.CityStore
+import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
@@ -34,6 +37,10 @@ class RadarActivity : AppCompatActivity() {
     private lateinit var legendMin: android.widget.TextView
     private lateinit var legendMid: android.widget.TextView
     private lateinit var legendMax: android.widget.TextView
+
+    // Tap-to-query (Task 10)
+    private val pointRepo = PointRepository()
+    private var queryMarker: Marker? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,6 +75,17 @@ class RadarActivity : AppCompatActivity() {
 
         // Task 8: wire layer picker
         findViewById<View>(R.id.btnLayers).setOnClickListener { showLayerPicker() }
+
+        // Task 10: tap-to-query events overlay — added at index 0 so it sits below other overlays
+        val events = org.osmdroid.views.overlay.MapEventsOverlay(
+            object : org.osmdroid.events.MapEventsReceiver {
+                override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+                    queryPoint(p); return true
+                }
+                override fun longPressHelper(p: GeoPoint): Boolean = false
+            }
+        )
+        map.overlays.add(0, events)
 
         showLayer(activeLayer)
     }
@@ -154,6 +172,25 @@ class RadarActivity : AppCompatActivity() {
         legendMin.text = "${layer.scaleMin}${layer.scaleUnit}"
         legendMid.text = "${(layer.scaleMin + layer.scaleMax) / 2}${layer.scaleUnit}"
         legendMax.text = "${layer.scaleMax}${layer.scaleUnit}"
+    }
+
+    // Task 10: tap-to-query
+    private fun queryPoint(p: GeoPoint) {
+        lifecycleScope.launch {
+            val fallback = String.format(java.util.Locale.US, "%.2f, %.2f", p.latitude, p.longitude)
+            val pf = pointRepo.query(p.latitude, p.longitude, activeLayer, fallback) ?: return@launch
+            queryMarker?.let { map.overlays.remove(it) }
+            val m = Marker(map).apply {
+                position = p
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
+                title = pf.place
+                snippet = pf.value
+            }
+            map.overlays.add(m)
+            queryMarker = m
+            m.showInfoWindow()
+            map.invalidate()
+        }
     }
 
     override fun onResume() { super.onResume(); map.onResume() }
