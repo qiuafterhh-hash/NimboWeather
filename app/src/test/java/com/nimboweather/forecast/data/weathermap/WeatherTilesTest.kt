@@ -16,7 +16,7 @@ class WeatherTilesUrlTest {
         val url = WeatherTiles.esriUrl(z = 5, x = 3, y = 7, token = "TOK")
         assertEquals(
             "https://static-map-tiles-api.arcgis.com/arcgis/rest/services/" +
-                "static-basemap-tiles-service/v1/arcgis/outdoor/static/tile/5/7/3?token=TOK", url
+                "static-basemap-tiles-service/v1/arcgis/light-gray/static/tile/5/7/3?token=TOK", url
         )
     }
 

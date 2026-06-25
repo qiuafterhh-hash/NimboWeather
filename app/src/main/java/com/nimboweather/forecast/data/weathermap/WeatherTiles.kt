@@ -11,10 +11,11 @@ object WeatherTiles {
         "https://tile.openweathermap.org/map/$layer/$z/$x/$y.png?appid=$key"
 
     // Esri ArcGIS Static Basemap Tiles service (the post-2026-06 replacement for the retired
-    // ibasemaps MapServer endpoint). `arcgis/outdoor` = light terrain + roads, 512px tiles.
+    // ibasemaps MapServer endpoint). `arcgis/light-gray` is a neutral canvas so the (semi-
+    // transparent) OWM weather overlay reads clearly on top. 512px tiles.
     fun esriUrl(z: Int, x: Int, y: Int, token: String): String =
         "https://static-map-tiles-api.arcgis.com/arcgis/rest/services/" +
-            "static-basemap-tiles-service/v1/arcgis/outdoor/static/tile/$z/$y/$x?token=$token"
+            "static-basemap-tiles-service/v1/arcgis/light-gray/static/tile/$z/$y/$x?token=$token"
 
     fun nexradUrl(z: Int, x: Int, y: Int): String =
         "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/" +

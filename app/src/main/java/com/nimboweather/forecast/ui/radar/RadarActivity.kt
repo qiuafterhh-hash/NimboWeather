@@ -102,7 +102,7 @@ class RadarActivity : AppCompatActivity() {
      * them at a different scale than the base and they misalign.
      */
     private fun esriBaseSource(): OnlineTileSourceBase =
-        object : OnlineTileSourceBase("EsriOutdoor", 0, ESRI_MAX_ZOOM, TILE_SIZE, ".png", arrayOf("")) {
+        object : OnlineTileSourceBase("EsriBase", 0, ESRI_MAX_ZOOM, TILE_SIZE, ".png", arrayOf("")) {
             override fun getTileURLString(i: Long): String = WeatherTiles.esriUrl(
                 z = MapTileIndex.getZoom(i), x = MapTileIndex.getX(i), y = MapTileIndex.getY(i),
                 token = BuildConfig.ESRI_API_KEY
