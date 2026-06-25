@@ -5,6 +5,7 @@ import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.nimboweather.forecast.BuildConfig
 import com.nimboweather.forecast.R
+import com.nimboweather.forecast.data.weathermap.RadarCoverage
 import com.nimboweather.forecast.data.weathermap.WeatherLayer
 import com.nimboweather.forecast.data.weathermap.WeatherTiles
 import com.nimboweather.forecast.prefs.CityStore
@@ -52,6 +53,10 @@ class RadarActivity : AppCompatActivity() {
         }
 
         findViewById<View>(R.id.btnRadarBack).setOnClickListener { finish() }
+
+        // Task 8: wire layer picker
+        findViewById<View>(R.id.btnLayers).setOnClickListener { showLayerPicker() }
+
         showLayer(activeLayer)
     }
 
@@ -64,9 +69,16 @@ class RadarActivity : AppCompatActivity() {
             )
         }
 
-    /** OWM model-tile source for [layer]. RADAR is added in a later task; until then it is unused. */
+    /** Build the overlay tile source for [layer]: NEXRAD for RADAR, OWM model tiles otherwise. */
     private fun overlaySource(layer: WeatherLayer): OnlineTileSourceBase {
-        val owm = layer.owmLayer ?: WeatherLayer.PRECIP.owmLayer ?: "precipitation_new"
+        if (layer == WeatherLayer.RADAR) {
+            return object : OnlineTileSourceBase("nexrad", 0, MAX_ZOOM, TILE_SIZE, ".png", arrayOf("")) {
+                override fun getTileURLString(i: Long): String = WeatherTiles.nexradUrl(
+                    z = MapTileIndex.getZoom(i), x = MapTileIndex.getX(i), y = MapTileIndex.getY(i)
+                )
+            }
+        }
+        val owm = layer.owmLayer!!
         return object : OnlineTileSourceBase("owm_$owm", 0, MAX_ZOOM, TILE_SIZE, ".png", arrayOf("")) {
             override fun getTileURLString(i: Long): String = WeatherTiles.owmUrl(
                 layer = owm, z = MapTileIndex.getZoom(i),
@@ -90,6 +102,33 @@ class RadarActivity : AppCompatActivity() {
             overlayAdded = true
         }
         map.invalidate()
+    }
+
+    // Task 8: layer picker dialog
+    private fun showLayerPicker() {
+        val layers = WeatherLayer.values()
+        val labels = layers.map { getString(it.labelRes) }.toTypedArray()
+        val checked = layers.indexOf(activeLayer)
+        androidx.appcompat.app.AlertDialog.Builder(this)
+            .setSingleChoiceItems(labels, checked) { dialog, which ->
+                selectLayer(layers[which])
+                dialog.dismiss()
+            }
+            .show()
+    }
+
+    private fun selectLayer(layer: WeatherLayer) {
+        if (layer == WeatherLayer.RADAR) {
+            val c = map.mapCenter
+            if (!RadarCoverage.hasNexrad(c.latitude, c.longitude)) {
+                android.widget.Toast.makeText(
+                    this, R.string.radar_unavailable_here, android.widget.Toast.LENGTH_SHORT
+                ).show()
+                showLayer(WeatherLayer.PRECIP)
+                return
+            }
+        }
+        showLayer(layer)
     }
 
     override fun onResume() { super.onResume(); map.onResume() }
