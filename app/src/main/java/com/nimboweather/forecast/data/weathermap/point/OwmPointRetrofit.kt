@@ -1,21 +1,11 @@
 package com.nimboweather.forecast.data.weathermap.point
 
-import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import kotlinx.serialization.json.Json
-import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
-import retrofit2.Retrofit
+import com.nimboweather.forecast.data.RetrofitProvider
 
+/**
+ * OWM Current Weather lives on the same host as [RetrofitProvider], so it reuses that shared
+ * Retrofit (one OkHttp pool + the debug logging interceptor) rather than building its own.
+ */
 object OwmPointRetrofit {
-    private const val BASE_URL = "https://api.openweathermap.org/"
-    private val json = Json { ignoreUnknownKeys = true }
-
-    val api: OwmPointApi by lazy {
-        Retrofit.Builder()
-            .baseUrl(BASE_URL)
-            .client(OkHttpClient.Builder().build())
-            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
-            .build()
-            .create(OwmPointApi::class.java)
-    }
+    val api: OwmPointApi by lazy { RetrofitProvider.retrofit.create(OwmPointApi::class.java) }
 }

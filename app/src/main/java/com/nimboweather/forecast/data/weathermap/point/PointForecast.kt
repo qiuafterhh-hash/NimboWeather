@@ -16,7 +16,7 @@ data class PointForecast(val place: String, val value: String) {
                 WeatherLayer.WIND -> "${resp.wind.speed.roundToInt()} m/s"
                 WeatherLayer.PRECIP, WeatherLayer.RADAR -> {
                     val mm = resp.rain?.oneHour ?: 0.0
-                    if (mm == 0.0) "0 mm" else "$mm mm"
+                    if (mm == 0.0) "0 mm" else String.format(java.util.Locale.US, "%.1f mm", mm)
                 }
                 WeatherLayer.TEMP -> "${resp.main.temp.roundToInt()}°C"
             }

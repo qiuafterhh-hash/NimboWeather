@@ -7,6 +7,7 @@ package com.nimboweather.forecast.data.weathermap
  * Extension point for v2: add more covered regions / a paid global source here.
  */
 object RadarCoverage {
+    // Note: Alaska/Hawaii have NEXRAD too but are excluded — v1 serves the contiguous US only.
     fun hasNexrad(lat: Double, lon: Double): Boolean =
         lat in 24.0..50.0 && lon in -125.0..-66.0
 }

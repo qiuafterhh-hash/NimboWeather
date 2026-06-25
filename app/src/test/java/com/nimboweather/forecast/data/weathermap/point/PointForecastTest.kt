@@ -36,4 +36,9 @@ class PointForecastTest {
         val p = PointForecast.from(resp.copy(name = ""), WeatherLayer.TEMP, fallbackPlace = "—")
         assertEquals("—", p.place)
     }
+
+    @Test fun precip_float_artifact_is_rounded_to_one_decimal() {
+        val noisy = resp.copy(rain = OwmRain(oneHour = 1.5000000000000002))
+        assertEquals("1.5 mm", PointForecast.from(noisy, WeatherLayer.PRECIP).value)
+    }
 }
