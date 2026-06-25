@@ -69,7 +69,8 @@ class WeatherCardsBuilder(private val context: Context) {
                     pressure = cur.main?.pressure ?: 0,
                     windText = "${degToCompass(cur.wind?.deg)} · ${(cur.wind?.speed ?: 0.0).roundToInt()} ${unitsStore.speedSymbol()}",
                     windDeg = cur.wind?.deg,
-                    windSpeed = (cur.wind?.speed ?: 0.0).toFloat()
+                    // FxSpec.windSpeed is m/s; OWM returns mph under imperial units, so normalize.
+                    windSpeed = (cur.wind?.speed ?: 0.0).toFloat() * (if (unitsStore.isMetric()) 1f else 0.447f)
                 )
                 HomeCardType.NOWCAST -> nowcast?.takeIf { it.series.isNotEmpty() }?.let {
                     HomeCard.Nowcast(NowcastLogic.headline(it.state), it.series)
