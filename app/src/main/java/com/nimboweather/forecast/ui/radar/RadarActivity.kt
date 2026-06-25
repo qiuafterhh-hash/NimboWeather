@@ -14,6 +14,7 @@ import com.nimboweather.forecast.data.radar.RadarRepository
 import com.nimboweather.forecast.data.radar.RadarTimeline
 import com.nimboweather.forecast.data.radar.RainViewerTiles
 import com.nimboweather.forecast.prefs.CityStore
+import com.nimboweather.forecast.ui.applySystemBarInsets
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.MapTileProviderBasic
@@ -69,6 +70,8 @@ class RadarActivity : AppCompatActivity() {
         Configuration.getInstance().userAgentValue = packageName
 
         setContentView(R.layout.activity_radar)
+        findViewById<View>(R.id.radarTopBar).applySystemBarInsets(top = true, left = true, right = true)
+        findViewById<View>(R.id.radarBottomBar).applySystemBarInsets(bottom = true, left = true, right = true)
         map = findViewById(R.id.map)
         timeLabel = findViewById(R.id.tvRadarTime)
         playBtn = findViewById(R.id.btnRadarPlay)
