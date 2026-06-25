@@ -29,6 +29,12 @@ class RadarActivity : AppCompatActivity() {
     private var overlayAdded = false
     private var activeLayer = WeatherLayer.TEMP
 
+    // Legend views (Task 9)
+    private lateinit var legendBar: View
+    private lateinit var legendMin: android.widget.TextView
+    private lateinit var legendMid: android.widget.TextView
+    private lateinit var legendMax: android.widget.TextView
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         Configuration.getInstance().load(
@@ -40,6 +46,12 @@ class RadarActivity : AppCompatActivity() {
         map = findViewById(R.id.map)
         map.setMultiTouchControls(true)
         map.setTileSource(esriBaseSource())
+
+        // Capture legend views (Task 9)
+        legendBar = findViewById(R.id.legendBar)
+        legendMin = findViewById(R.id.legendMin)
+        legendMid = findViewById(R.id.legendMid)
+        legendMax = findViewById(R.id.legendMax)
 
         val city = CityStore(this).selected
         val center = GeoPoint(city?.lat ?: DEFAULT_LAT, city?.lon ?: DEFAULT_LON)
@@ -102,6 +114,7 @@ class RadarActivity : AppCompatActivity() {
             overlayAdded = true
         }
         map.invalidate()
+        bindLegend(layer) // Task 9
     }
 
     // Task 8: layer picker dialog
@@ -129,6 +142,18 @@ class RadarActivity : AppCompatActivity() {
             }
         }
         showLayer(layer)
+    }
+
+    // Task 9: color-scale legend
+    private fun bindLegend(layer: WeatherLayer) {
+        val gd = android.graphics.drawable.GradientDrawable(
+            android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+            layer.scaleColors
+        ).apply { cornerRadius = 6f }
+        legendBar.background = gd
+        legendMin.text = "${layer.scaleMin}${layer.scaleUnit}"
+        legendMid.text = "${(layer.scaleMin + layer.scaleMax) / 2}${layer.scaleUnit}"
+        legendMax.text = "${layer.scaleMax}${layer.scaleUnit}"
     }
 
     override fun onResume() { super.onResume(); map.onResume() }
