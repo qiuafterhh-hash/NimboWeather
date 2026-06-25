@@ -68,7 +68,8 @@ class WeatherCardsBuilder(private val context: Context) {
                     rainProb = precip.firstOrNull()?.pop ?: 0,
                     pressure = cur.main?.pressure ?: 0,
                     windText = "${degToCompass(cur.wind?.deg)} · ${(cur.wind?.speed ?: 0.0).roundToInt()} ${unitsStore.speedSymbol()}",
-                    windDeg = cur.wind?.deg
+                    windDeg = cur.wind?.deg,
+                    windSpeed = (cur.wind?.speed ?: 0.0).toFloat()
                 )
                 HomeCardType.NOWCAST -> nowcast?.takeIf { it.series.isNotEmpty() }?.let {
                     HomeCard.Nowcast(NowcastLogic.headline(it.state), it.series)
