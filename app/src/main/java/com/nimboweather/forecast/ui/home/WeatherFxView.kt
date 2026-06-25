@@ -35,6 +35,8 @@ class WeatherFxView @JvmOverloads constructor(
         if (cur != null && cur.spec.scene == spec.scene) {
             cur.spec = spec // same scene → just update params (intensity/wind)
         } else {
+            // Only one outgoing scene is tracked; a rapid 3rd change drops the prior
+            // fade-out instantly (acceptable for a background behind cards).
             outgoing = cur?.apply { target = 0f }
             current = if (spec.scene == FxScene.NONE) null
             else Scene(spec).also { if (width > 0) it.resize(width, height) }
@@ -54,6 +56,11 @@ class WeatherFxView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() { super.onAttachedToWindow(); startLoop() }
     override fun onDetachedFromWindow() { super.onDetachedFromWindow(); running = false }
+
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        super.onWindowVisibilityChanged(visibility)
+        if (visibility == VISIBLE) startLoop()
+    }
 
     private fun startLoop() {
         if (current == null && outgoing == null) { running = false; return }
