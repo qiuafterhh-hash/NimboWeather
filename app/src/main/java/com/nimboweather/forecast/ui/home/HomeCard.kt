@@ -20,7 +20,8 @@ sealed interface HomeCard {
         val rainProb: Int,
         val pressure: Int,
         val windText: String,
-        val windDeg: Int? = null
+        val windDeg: Int? = null,
+        val windSpeed: Float = 0f
     ) : HomeCard
 
     /** Short-term precipitation nowcast: a plain-language headline + the 15-min mm series for the curve. */

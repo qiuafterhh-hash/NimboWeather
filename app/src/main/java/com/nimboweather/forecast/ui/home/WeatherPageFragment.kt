@@ -39,9 +39,18 @@ class WeatherPageFragment : Fragment() {
                     is CityWeatherViewModel.UiState.Loading -> swipe.isRefreshing = true
                     is CityWeatherViewModel.UiState.Data -> {
                         swipe.isRefreshing = false
-                        val icon = state.cards.firstNotNullOfOrNull { (it as? HomeCard.Current)?.icon }
+                        val current = state.cards.firstNotNullOfOrNull { it as? HomeCard.Current }
+                        val icon = current?.icon
+                        val nowcastSeries = state.cards.firstNotNullOfOrNull { (it as? HomeCard.Nowcast)?.series }
                         root.background = SkyGradient.drawable(icon)
-                        view.findViewById<WeatherFxView>(R.id.weatherFx).setCondition(icon)
+                        view.findViewById<WeatherFxView>(R.id.weatherFx).setSpec(
+                            FxSpec(
+                                scene = FxMapper.sceneFrom(icon),
+                                windDeg = current?.windDeg,
+                                windSpeed = current?.windSpeed ?: 0f,
+                                intensity = FxMapper.intensityFrom(nowcastSeries, current?.rainProb, icon)
+                            )
+                        )
                         renderer.render(content, state.cards)
                     }
                     is CityWeatherViewModel.UiState.Error -> swipe.isRefreshing = false
