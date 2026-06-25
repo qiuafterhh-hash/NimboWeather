@@ -15,8 +15,8 @@ class WeatherTilesUrlTest {
     @Test fun esri_url_uses_z_y_x_order_with_token() {
         val url = WeatherTiles.esriUrl(z = 5, x = 3, y = 7, token = "TOK")
         assertEquals(
-            "https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Topo_Map/" +
-                "MapServer/tile/5/7/3?token=TOK", url
+            "https://static-map-tiles-api.arcgis.com/arcgis/rest/services/" +
+                "static-basemap-tiles-service/v1/arcgis/outdoor/static/tile/5/7/3?token=TOK", url
         )
     }
 

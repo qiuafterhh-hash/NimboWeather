@@ -1,17 +1,20 @@
 package com.nimboweather.forecast.data.weathermap
 
 /**
- * Pure tile-URL builders. The map view supplies z/x/y per visible tile. Note Esri uses z/y/x
- * order (unlike the XYZ standard), so it cannot use osmdroid's plain XYTileSource.
+ * Pure tile-URL builders. The map view supplies z/x/y per visible tile. Note Esri's Static
+ * Basemap Tiles service uses level/row/column = z/y/x order (unlike the XYZ standard) and serves
+ * 512px PNGs, so it needs a custom source (not osmdroid's plain XYTileSource).
  */
 object WeatherTiles {
 
     fun owmUrl(layer: String, z: Int, x: Int, y: Int, key: String): String =
         "https://tile.openweathermap.org/map/$layer/$z/$x/$y.png?appid=$key"
 
+    // Esri ArcGIS Static Basemap Tiles service (the post-2026-06 replacement for the retired
+    // ibasemaps MapServer endpoint). `arcgis/outdoor` = light terrain + roads, 512px tiles.
     fun esriUrl(z: Int, x: Int, y: Int, token: String): String =
-        "https://ibasemaps-api.arcgis.com/arcgis/rest/services/World_Topo_Map/" +
-            "MapServer/tile/$z/$y/$x?token=$token"
+        "https://static-map-tiles-api.arcgis.com/arcgis/rest/services/" +
+            "static-basemap-tiles-service/v1/arcgis/outdoor/static/tile/$z/$y/$x?token=$token"
 
     fun nexradUrl(z: Int, x: Int, y: Int): String =
         "https://mesonet.agron.iastate.edu/cache/tile.py/1.0.0/" +

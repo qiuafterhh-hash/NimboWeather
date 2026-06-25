@@ -96,9 +96,13 @@ class RadarActivity : AppCompatActivity() {
         showLayer(activeLayer)
     }
 
-    /** Esri World_Topo_Map — z/y/x order + token, so a custom source (not plain XYTileSource). */
+    /**
+     * Esri Static Basemap Tiles (arcgis/outdoor) — z/y/x order + token, 512px tiles, so a custom
+     * source. The overlay sources below MUST declare the same TILE_SIZE (512) or osmdroid draws
+     * them at a different scale than the base and they misalign.
+     */
     private fun esriBaseSource(): OnlineTileSourceBase =
-        object : OnlineTileSourceBase("EsriTopo", 0, ESRI_MAX_ZOOM, 256, ".png", arrayOf("")) {
+        object : OnlineTileSourceBase("EsriOutdoor", 0, ESRI_MAX_ZOOM, TILE_SIZE, ".png", arrayOf("")) {
             override fun getTileURLString(i: Long): String = WeatherTiles.esriUrl(
                 z = MapTileIndex.getZoom(i), x = MapTileIndex.getX(i), y = MapTileIndex.getY(i),
                 token = BuildConfig.ESRI_API_KEY
@@ -212,7 +216,9 @@ class RadarActivity : AppCompatActivity() {
         private const val DEFAULT_LON = -0.1278
         private const val DEFAULT_ZOOM = 6.0
         private const val MAX_ZOOM = 12
-        private const val TILE_SIZE = 256
-        private const val ESRI_MAX_ZOOM = 19
+        // 512px to match Esri's Static Basemap Tiles. OWM/NEXRAD serve 256px PNGs; osmdroid
+        // upscales them into the 512 grid (slightly softer, geographically aligned with the base).
+        private const val TILE_SIZE = 512
+        private const val ESRI_MAX_ZOOM = 22
     }
 }
