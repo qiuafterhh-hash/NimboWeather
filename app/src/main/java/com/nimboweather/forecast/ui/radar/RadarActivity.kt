@@ -2,6 +2,9 @@ package com.nimboweather.forecast.ui.radar
 
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
+import android.graphics.drawable.GradientDrawable
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.nimboweather.forecast.BuildConfig
@@ -13,13 +16,16 @@ import com.nimboweather.forecast.data.weathermap.point.PointRepository
 import com.nimboweather.forecast.prefs.CityStore
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
+import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.tileprovider.MapTileProviderBasic
 import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.util.MapTileIndex
 import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.TilesOverlay
+import java.util.Locale
 
 /**
  * Multi-layer weather map: an Esri base with one static OWM/NEXRAD tile overlay for the active
@@ -77,8 +83,8 @@ class RadarActivity : AppCompatActivity() {
         findViewById<View>(R.id.btnLayers).setOnClickListener { showLayerPicker() }
 
         // Task 10: tap-to-query events overlay — added at index 0 so it sits below other overlays
-        val events = org.osmdroid.views.overlay.MapEventsOverlay(
-            object : org.osmdroid.events.MapEventsReceiver {
+        val events = MapEventsOverlay(
+            object : MapEventsReceiver {
                 override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
                     queryPoint(p); return true
                 }
@@ -108,7 +114,7 @@ class RadarActivity : AppCompatActivity() {
                 )
             }
         }
-        val owm = layer.owmLayer!!
+        val owm = layer.owmLayer!! // safe: the RADAR branch returned above, so owmLayer is non-null here
         return object : OnlineTileSourceBase("owm_$owm", 0, MAX_ZOOM, TILE_SIZE, ".png", arrayOf("")) {
             override fun getTileURLString(i: Long): String = WeatherTiles.owmUrl(
                 layer = owm, z = MapTileIndex.getZoom(i),
@@ -140,7 +146,7 @@ class RadarActivity : AppCompatActivity() {
         val layers = WeatherLayer.values()
         val labels = layers.map { getString(it.labelRes) }.toTypedArray()
         val checked = layers.indexOf(activeLayer)
-        androidx.appcompat.app.AlertDialog.Builder(this)
+        AlertDialog.Builder(this)
             .setSingleChoiceItems(labels, checked) { dialog, which ->
                 selectLayer(layers[which])
                 dialog.dismiss()
@@ -151,9 +157,10 @@ class RadarActivity : AppCompatActivity() {
     private fun selectLayer(layer: WeatherLayer) {
         if (layer == WeatherLayer.RADAR) {
             val c = map.mapCenter
+            // v1: gated at select-time on the current center only; panning out of coverage shows empty tiles.
             if (!RadarCoverage.hasNexrad(c.latitude, c.longitude)) {
-                android.widget.Toast.makeText(
-                    this, R.string.radar_unavailable_here, android.widget.Toast.LENGTH_SHORT
+                Toast.makeText(
+                    this, R.string.radar_unavailable_here, Toast.LENGTH_SHORT
                 ).show()
                 showLayer(WeatherLayer.PRECIP)
                 return
@@ -164,10 +171,14 @@ class RadarActivity : AppCompatActivity() {
 
     // Task 9: color-scale legend
     private fun bindLegend(layer: WeatherLayer) {
-        val gd = android.graphics.drawable.GradientDrawable(
-            android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+        val gd = GradientDrawable(
+            GradientDrawable.Orientation.LEFT_RIGHT,
             layer.scaleColors
-        ).apply { cornerRadius = 6f }
+        ).apply {
+            cornerRadius = android.util.TypedValue.applyDimension(
+                android.util.TypedValue.COMPLEX_UNIT_DIP, 4f, resources.displayMetrics
+            )
+        }
         legendBar.background = gd
         legendMin.text = "${layer.scaleMin}${layer.scaleUnit}"
         legendMid.text = "${(layer.scaleMin + layer.scaleMax) / 2}${layer.scaleUnit}"
@@ -177,7 +188,7 @@ class RadarActivity : AppCompatActivity() {
     // Task 10: tap-to-query
     private fun queryPoint(p: GeoPoint) {
         lifecycleScope.launch {
-            val fallback = String.format(java.util.Locale.US, "%.2f, %.2f", p.latitude, p.longitude)
+            val fallback = String.format(Locale.US, "%.2f, %.2f", p.latitude, p.longitude)
             val pf = pointRepo.query(p.latitude, p.longitude, activeLayer, fallback) ?: return@launch
             queryMarker?.let { map.overlays.remove(it) }
             val m = Marker(map).apply {
