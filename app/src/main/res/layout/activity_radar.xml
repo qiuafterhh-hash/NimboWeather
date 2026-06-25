@@ -12,6 +12,7 @@
 
     <!-- Top bar: back + title + layer switcher -->
     <LinearLayout
+        android:id="@+id/radarTopBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="#CC0B1A2E"
@@ -50,6 +51,7 @@
 
     <!-- Bottom: color-scale legend + attribution -->
     <LinearLayout
+        android:id="@+id/radarBottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"

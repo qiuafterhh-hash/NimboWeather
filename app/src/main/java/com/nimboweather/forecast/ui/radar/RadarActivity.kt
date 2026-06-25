@@ -14,6 +14,7 @@ import com.nimboweather.forecast.data.weathermap.WeatherLayer
 import com.nimboweather.forecast.data.weathermap.WeatherTiles
 import com.nimboweather.forecast.data.weathermap.point.PointRepository
 import com.nimboweather.forecast.prefs.CityStore
+import com.nimboweather.forecast.ui.applySystemBarInsets
 import kotlinx.coroutines.launch
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -56,6 +57,8 @@ class RadarActivity : AppCompatActivity() {
         Configuration.getInstance().userAgentValue = packageName
 
         setContentView(R.layout.activity_radar)
+        findViewById<View>(R.id.radarTopBar).applySystemBarInsets(top = true, left = true, right = true)
+        findViewById<View>(R.id.radarBottomBar).applySystemBarInsets(bottom = true, left = true, right = true)
         map = findViewById(R.id.map)
         map.setMultiTouchControls(true)
         map.setTileSource(esriBaseSource())
