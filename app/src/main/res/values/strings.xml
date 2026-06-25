@@ -47,4 +47,8 @@
     <string name="heatmap_coming_soon">Weather map coming soon</string>
     <string name="units_label">Units (°C / °F)</string>
     <string name="widget_description">Current weather, hi/lo and air quality for a chosen city</string>
+    <string name="layer_temp">Temperature</string>
+    <string name="layer_precip">Precipitation</string>
+    <string name="layer_wind">Wind</string>
+    <string name="layer_radar">Radar</string>
 </resources>
