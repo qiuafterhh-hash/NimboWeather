@@ -12,6 +12,8 @@ import com.google.android.gms.ads.nativead.NativeAdView
 import com.nimboweather.forecast.R
 import com.nimboweather.forecast.ads.AdMediator
 import com.nimboweather.forecast.ads.NativeAdHolder
+import com.nimboweather.forecast.ui.applySystemBarInsets
+import com.nimboweather.forecast.ui.applySystemBarMargins
 
 /**
  * Renders a NativeAd full-screen (the "native disguised as full-screen interstitial"
@@ -31,6 +33,8 @@ class NativeFullscreenActivity : AppCompatActivity() {
         if (ad == null) { finish(); return }
 
         val adView = findViewById<NativeAdView>(R.id.nativeAdView)
+        adView.applySystemBarInsets(top = true, bottom = true, left = true, right = true)
+        findViewById<View>(R.id.closeOverlay).applySystemBarMargins(top = true, right = true)
         val tvHeadline = findViewById<TextView>(R.id.tvHeadline)
         val tvBody = findViewById<TextView>(R.id.tvBody)
         val ivIcon = findViewById<ImageView>(R.id.ivIcon)

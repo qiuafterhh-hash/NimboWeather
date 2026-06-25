@@ -12,6 +12,8 @@ import androidx.core.view.WindowCompat
 import com.nimboweather.forecast.R
 import com.nimboweather.forecast.prefs.AppPrefs
 import com.nimboweather.forecast.ui.MainActivity
+import com.nimboweather.forecast.ui.applySystemBarInsets
+import com.nimboweather.forecast.ui.contentRootChild
 
 /** First-run value props + location/notification permission priming. */
 class OnboardingActivity : AppCompatActivity() {
@@ -23,6 +25,7 @@ class OnboardingActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_onboarding)
+        contentRootChild().applySystemBarInsets(top = true, bottom = true, left = true, right = true)
         WindowCompat.getInsetsController(window, window.decorView).isAppearanceLightStatusBars = false
 
         findViewById<Button>(R.id.btnStart).setOnClickListener {

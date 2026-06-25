@@ -13,6 +13,8 @@ import com.nimboweather.forecast.data.PopularCities
 import com.nimboweather.forecast.prefs.CityStore
 import com.nimboweather.forecast.prefs.SavedCity
 import com.nimboweather.forecast.prefs.WidgetPrefs
+import com.nimboweather.forecast.ui.applySystemBarInsets
+import com.nimboweather.forecast.ui.contentRootChild
 import com.nimboweather.forecast.ui.findcity.CityAdapter
 
 /** Shown when a widget is added: pick which city this widget tracks. */
@@ -30,6 +32,7 @@ class WidgetConfigActivity : AppCompatActivity() {
         if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) { finish(); return }
 
         setContentView(R.layout.activity_widget_config)
+        contentRootChild().applySystemBarInsets(top = true, bottom = true, left = true, right = true)
 
         val saved = CityStore(this).saved().map { GeoLocation(it.name, it.lat, it.lon, it.country) }
         val options = saved + PopularCities.list
