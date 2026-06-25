@@ -45,4 +45,11 @@ class ScenicPaletteTest {
     @Test fun null_icon_falls_back_to_clear_day() {
         assertEquals(ScenicPalettes.from("01d"), ScenicPalettes.from(null))
     }
+
+    @Test fun unknown_icon_falls_back_by_day_night_suffix() {
+        // Garbage codes use the same clear day/night fallback as the null case.
+        assertEquals(ScenicPalettes.from("01d"), ScenicPalettes.from("99d"))
+        assertEquals(ScenicPalettes.from("01n"), ScenicPalettes.from("99n"))
+        assertTrue(ScenicPalettes.from("99d") != ScenicPalettes.from("99n"))
+    }
 }
