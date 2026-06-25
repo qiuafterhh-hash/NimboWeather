@@ -28,7 +28,7 @@ class WeatherScenicView @JvmOverloads constructor(
     // BAND_FRACTION of the view height, everything above it is transparent.
     private val farPath = Path()
     private val nearPath = Path()
-    private val trees = ArrayList<FloatArray>() // each: [baseX, baseY, halfWidth, height]
+    private val trees = ArrayList<Path>() // prebuilt pine silhouettes on the near ridge
     private var bandTop = 0f
 
     private val fill = Paint(Paint.ANTI_ALIAS_FLAG)
@@ -71,12 +71,17 @@ class WeatherScenicView @JvmOverloads constructor(
         trees.clear()
         val ridgeY = bandTop + dp(96f)
         floatArrayOf(0.12f, 0.30f, 0.78f).forEach { fx ->
-            trees.add(floatArrayOf(width * fx, ridgeY + dp(6f), dp(11f), dp(34f)))
+            trees.add(pinePath(width * fx, ridgeY + dp(6f), dp(11f), dp(34f)))
         }
     }
 
     override fun onAttachedToWindow() { super.onAttachedToWindow(); if (fade < 1f) startFade() }
     override fun onDetachedFromWindow() { super.onDetachedFromWindow(); running = false }
+
+    override fun onWindowVisibilityChanged(visibility: Int) {
+        super.onWindowVisibilityChanged(visibility)
+        if (visibility == VISIBLE && fade < 1f) startFade()
+    }
 
     private fun startFade() {
         if (TestEnv.active) { running = false; invalidate(); return }
@@ -106,7 +111,7 @@ class WeatherScenicView @JvmOverloads constructor(
         fill.color = withAlpha(p.nearHill, a); canvas.drawPath(nearPath, fill)
         // trees
         fill.color = withAlpha(p.accent, a)
-        for (t in trees) drawPine(canvas, t[0], t[1], t[2], t[3])
+        for (tree in trees) canvas.drawPath(tree, fill)
         // snow caps: light ridgeline along the near hill top
         if (p.snowCaps) {
             fill.color = withAlpha(0xFFEAF2F8.toInt(), (alpha * 200f).toInt().coerceIn(0, 255))
@@ -126,13 +131,13 @@ class WeatherScenicView @JvmOverloads constructor(
         }
     }
 
-    private fun drawPine(canvas: Canvas, baseX: Float, baseY: Float, halfW: Float, h: Float) {
+    private fun pinePath(baseX: Float, baseY: Float, halfW: Float, h: Float): Path {
         val p = Path()
         p.moveTo(baseX, baseY - h)
         p.lineTo(baseX - halfW, baseY)
         p.lineTo(baseX + halfW, baseY)
         p.close()
-        canvas.drawPath(p, fill)
+        return p
     }
 
     private fun withAlpha(color: Int, a: Int): Int =
