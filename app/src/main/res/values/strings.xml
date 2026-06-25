@@ -12,10 +12,10 @@
     <string name="precip_label">Precipitation</string>
     <string name="nowcast_label">Next hour</string>
     <string name="back">Back</string>
-    <string name="radar_title">Rain radar · Beta</string>
-    <string name="radar_play_pause">Play / pause</string>
-    <string name="radar_attribution">© OpenStreetMap · RainViewer</string>
-    <string name="radar_unavailable">Radar unavailable right now</string>
+    <string name="radar_title">Weather map</string>
+    <string name="weathermap_attribution">© OpenWeather · Esri · NEXRAD/IEM</string>
+    <string name="layer_switch">Switch layer</string>
+    <string name="radar_unavailable_here">No radar coverage here — showing precipitation</string>
     <string name="sun_label">Sunrise &amp; Sunset</string>
     <string name="sunrise">Sunrise</string>
     <string name="sunset">Sunset</string>
@@ -47,4 +47,8 @@
     <string name="heatmap_coming_soon">Weather map coming soon</string>
     <string name="units_label">Units (°C / °F)</string>
     <string name="widget_description">Current weather, hi/lo and air quality for a chosen city</string>
+    <string name="layer_temp">Temperature</string>
+    <string name="layer_precip">Precipitation</string>
+    <string name="layer_wind">Wind</string>
+    <string name="layer_radar">Radar</string>
 </resources>

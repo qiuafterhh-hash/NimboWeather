@@ -12,18 +12,19 @@ object RetrofitProvider {
 
     private val json = Json { ignoreUnknownKeys = true }
 
-    val api: WeatherApi by lazy {
+    /** Shared Retrofit for the OpenWeatherMap host; reuse this for any OWM endpoint. */
+    val retrofit: Retrofit by lazy {
         val client = OkHttpClient.Builder()
             .addInterceptor(
                 HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BASIC }
             )
             .build()
-
         Retrofit.Builder()
             .baseUrl(BASE_URL)
             .client(client)
             .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
             .build()
-            .create(WeatherApi::class.java)
     }
+
+    val api: WeatherApi by lazy { retrofit.create(WeatherApi::class.java) }
 }

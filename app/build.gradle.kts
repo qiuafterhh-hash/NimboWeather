@@ -12,6 +12,7 @@ val localProps = Properties().apply {
     if (f.exists()) FileInputStream(f).use { load(it) }
 }
 val owmKey: String = localProps.getProperty("OPENWEATHER_API_KEY") ?: ""
+val esriKey: String = localProps.getProperty("ESRI_API_KEY") ?: ""
 
 // --- Version management: derive versionName/versionCode from the latest git tag ---
 // Tag `vX.Y.Z` -> versionName "X.Y.Z", versionCode X*1_000_000 + Y*1_000 + Z (monotonic).
@@ -48,6 +49,7 @@ android {
         versionCode = appVersionCode
         versionName = appVersionName
         buildConfigField("String", "OPENWEATHER_API_KEY", "\"$owmKey\"")
+        buildConfigField("String", "ESRI_API_KEY", "\"$esriKey\"")
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

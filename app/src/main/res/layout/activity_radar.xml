@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Top bar: back + title -->
+    <!-- Top bar: back + title + layer switcher -->
     <LinearLayout
         android:id="@+id/radarTopBar"
         android:layout_width="match_parent"
@@ -38,51 +38,40 @@
             android:textColor="@color/on_sky"
             android:textSize="18sp"
             android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btnLayers"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/layer_switch"
+            android:src="@drawable/ic_map"
+            app:tint="@color/on_sky" />
     </LinearLayout>
 
-    <!-- Bottom bar: play/pause + frame timestamp + attribution -->
+    <!-- Bottom: color-scale legend + attribution -->
     <LinearLayout
         android:id="@+id/radarBottomBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:background="#CC0B1A2E"
-        android:gravity="center_vertical"
-        android:orientation="horizontal"
-        android:padding="12dp">
+        android:orientation="vertical"
+        android:padding="10dp">
 
-        <ImageButton
-            android:id="@+id/btnRadarPlay"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:contentDescription="@string/radar_play_pause"
-            android:src="@android:drawable/ic_media_pause"
-            app:tint="@color/on_sky" />
+        <include
+            android:id="@+id/legend"
+            layout="@layout/view_layer_legend" />
 
         <TextView
-            android:id="@+id/tvRadarTime"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginStart="10dp"
-            android:textColor="@color/on_sky"
-            android:textSize="14sp"
-            tools:text="12:30" />
-
-        <TextView
+            android:id="@+id/tvAttribution"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
             android:alpha="0.7"
-            android:text="@string/radar_attribution"
+            android:text="@string/weathermap_attribution"
             android:textColor="@color/on_sky_secondary"
             android:textSize="10sp" />
     </LinearLayout>
-
-    <ProgressBar
-        android:id="@+id/radarProgress"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center" />
 
 </FrameLayout>
