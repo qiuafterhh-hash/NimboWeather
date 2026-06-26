@@ -108,16 +108,17 @@ class HomeCardRenderer(private val context: Context) {
             cell.findViewById<TextView>(R.id.tvMetricLabel).text = m.label
             cell.findViewById<TextView>(R.id.tvMetricValue).text = m.value
             val sub = cell.findViewById<TextView>(R.id.tvMetricSub)
-            if (m.sub != null) { sub.text = m.sub; sub.visibility = View.VISIBLE } else sub.visibility = View.GONE
+            // Keep the sub line's height reserved (INVISIBLE, not GONE) when a
+            // metric has no sub text, so every cell has the same natural height
+            // regardless of content. This keeps the outer spacing between the
+            // 2-col cards uniform without making the GridLayout cells FILL — the
+            // latter triggers a requestLayout-during-layout loop that never reaches
+            // idle (breaks Espresso / janky on device).
+            if (m.sub != null) { sub.text = m.sub; sub.visibility = View.VISIBLE }
+            else { sub.text = " "; sub.visibility = View.INVISIBLE }
             val lp = GridLayout.LayoutParams().apply {
                 width = 0
-                // height stays WRAP_CONTENT so each cell still reports its natural
-                // height to the row; FILL row-alignment then stretches the shorter
-                // cell in a row up to the tallest one, so cards whose content length
-                // differs (sub line present vs. absent) stay equal-height and the
-                // outer spacing between cards reads consistently.
-                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, GridLayout.FILL, 1f)
-                rowSpec = GridLayout.spec(GridLayout.UNDEFINED, GridLayout.FILL)
+                columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                 setMargins(8, 8, 8, 8)
             }
             grid.addView(cell, lp)
