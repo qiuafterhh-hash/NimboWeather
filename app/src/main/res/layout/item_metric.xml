@@ -39,14 +39,22 @@
                 android:textSize="12sp" />
         </LinearLayout>
 
+        <!-- Single line + autosize so a long value (e.g. "Waxing gibbous") shrinks to
+             fit instead of wrapping to two lines and making this cell taller than its
+             rowmate. Keeps the 2-col metric cards equal-height. -->
         <TextView
             android:id="@+id/tvMetricValue"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:maxLines="1"
             android:textColor="@color/on_sky"
             android:textSize="22sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            app:autoSizeTextType="uniform"
+            app:autoSizeMinTextSize="13sp"
+            app:autoSizeMaxTextSize="22sp"
+            app:autoSizeStepGranularity="1sp" />
 
         <TextView
             android:id="@+id/tvMetricSub"
